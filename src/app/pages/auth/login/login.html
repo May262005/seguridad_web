@@ -1,0 +1,11 @@
+<h2>Login</h2>
+
+<form [formGroup]="loginForm" (ngSubmit)="login()" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 250px;">
+  <input pInputText placeholder="Correo" formControlName="email" />
+  <p-password placeholder="Contraseña" formControlName="password"></p-password>
+
+  <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <p-button label="Entrar" type="submit" severity="success"></p-button>
+    <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+  </div>
+</form>
