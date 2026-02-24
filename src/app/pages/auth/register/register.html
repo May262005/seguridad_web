@@ -1,12 +1,63 @@
-<h2>Registro</h2>
+<p-toast position="top-right"></p-toast>
 
-<form [formGroup]="registerForm" (ngSubmit)="register()" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 250px;">
-  <input pInputText placeholder="Nombre" formControlName="name" />
-  <input pInputText placeholder="Correo" formControlName="email" />
-  <p-password placeholder="Contraseña" formControlName="password"></p-password>
+<div style="display:flex; justify-content:center; margin-top:30px; padding:16px;">
+  <div style="width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px;">
 
-  <div style="display: flex; gap: 10px; margin-top: 10px;">
-    <p-button label="Registrarse" type="submit" severity="success"></p-button>
-    <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+    <h2>Registro</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="register()" style="display:flex; flex-direction:column; gap:12px;">
+
+      <input pInputText formControlName="username" placeholder="Usuario" />
+      <small class="p-error" *ngIf="username?.invalid && username?.touched">
+        Usuario obligatorio (mín. 3 caracteres).
+      </small>
+
+      <input pInputText formControlName="fullName" placeholder="Nombre completo" />
+      <small class="p-error" *ngIf="fullName?.invalid && fullName?.touched">
+        Nombre obligatorio.
+      </small>
+
+      <input pInputText formControlName="email" placeholder="Correo electrónico" />
+      <small class="p-error" *ngIf="email?.invalid && email?.touched">
+        Correo inválido o vacío.
+      </small>
+
+      <p-datepicker formControlName="birthDate" placeholder="Fecha de nacimiento"
+        dateFormat="dd/mm/yy" [showIcon]="true" [maxDate]="today">
+      </p-datepicker>
+      <small class="p-error" *ngIf="birthDate?.invalid && birthDate?.touched">
+        {{ birthDate?.errors?.['underage'] ? 'Debes ser mayor de 18 años.' : 'Fecha obligatoria.' }}
+      </small>
+
+      <input pInputText formControlName="phone" placeholder="Teléfono (10 dígitos)" maxlength="10" />
+      <small class="p-error" *ngIf="phone?.invalid && phone?.touched">
+        Solo números, exactamente 10 dígitos.
+      </small>
+
+      <input pInputText formControlName="address" placeholder="Dirección" />
+      <small class="p-error" *ngIf="address?.invalid && address?.touched">
+        Dirección obligatoria.
+      </small>
+
+      <p-password formControlName="password" placeholder="Contraseña"
+        [toggleMask]="true" [feedback]="true">
+      </p-password>
+      <small class="p-error" *ngIf="password?.invalid && password?.touched">
+        Mín. 10 caracteres, mayúscula, minúscula, número y símbolo (!@#$%^&*).
+      </small>
+
+      <p-password formControlName="confirmPassword" placeholder="Confirmar contraseña"
+        [feedback]="false" [toggleMask]="true">
+      </p-password>
+      <small class="p-error" *ngIf="confirmPassword?.touched && registerForm.errors?.['passwordsMismatch']">
+        Las contraseñas no coinciden.
+      </small>
+
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <p-button label="Registrarse" type="submit" severity="success"></p-button>
+        <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+      </div>
+
+    </form>
   </div>
-</form>
+</div>

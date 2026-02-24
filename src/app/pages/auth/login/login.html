@@ -1,11 +1,31 @@
-<h2>Login</h2>
+<div style="display:flex; justify-content:center; margin-top:60px;">
+  <div style="width:320px; display:flex; flex-direction:column; gap:12px;">
+    
+    <h2>Iniciar Sesión</h2>
 
-<form [formGroup]="loginForm" (ngSubmit)="login()" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 250px;">
-  <input pInputText placeholder="Correo" formControlName="email" />
-  <p-password placeholder="Contraseña" formControlName="password"></p-password>
+    <form [formGroup]="loginForm" (ngSubmit)="login()" style="display:flex; flex-direction:column; gap:12px;">
+      
+      <input pInputText formControlName="email" placeholder="Correo electrónico" />
+      <small class="p-error" *ngIf="email?.invalid && email?.touched">
+        Correo inválido o vacío.
+      </small>
 
-  <div style="display: flex; gap: 10px; margin-top: 10px;">
-    <p-button label="Entrar" type="submit" severity="success"></p-button>
-    <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+      <p-password formControlName="password" placeholder="Contraseña"
+        [feedback]="false" [toggleMask]="true">
+      </p-password>
+      <small class="p-error" *ngIf="password?.invalid && password?.touched">
+        La contraseña es obligatoria.
+      </small>
+
+      <p-message *ngIf="loginError" severity="error" text="Credenciales incorrectas."></p-message>
+
+      <div style="display:flex; gap:10px;">
+        <p-button label="Entrar" type="submit" severity="success"></p-button>
+        <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+      </div>
+
+    </form>
+
+    <small style="color:#888;">Prueba: admin@app.com / Admin@12345</small>
   </div>
-</form>
+</div>
