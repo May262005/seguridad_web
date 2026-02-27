@@ -3,9 +3,9 @@ import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
-  selector: 'app-welcome',
+  selector: 'app-home',
   standalone: true,
   imports: [ButtonModule, RouterModule],
-  templateUrl: './welcome.html',
+  templateUrl: './home.html',
 })
-export class Welcome {}
+export class Home {}

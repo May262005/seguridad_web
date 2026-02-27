@@ -1,0 +1,16 @@
+.layout{
+display:flex;
+height:100vh;
+}
+
+.contenido{
+
+flex:1;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:#0b0b0b;
+
+}

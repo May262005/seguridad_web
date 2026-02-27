@@ -40,7 +40,7 @@ export class Login {
       const { email, password } = this.loginForm.value;
       const match = VALID_USERS.find(u => u.email === email && u.password === password);
       if (match) {
-        this.router.navigate(['/welcome']);
+        this.router.navigate(['/app/home']);
       } else {
         this.loginError = true;
       }
