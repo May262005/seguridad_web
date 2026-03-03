@@ -1,21 +1,13 @@
 <div class="sidebar">
 
-  <h2 class="titulo">Menú</h2>
+  <div class="sidebar-title">Nombre App</div>
 
-  <p-button 
-    label="Inicio"
-    icon="pi pi-home"
-    severity="info"
-    routerLink="/app/home"
-    styleClass="w-full">
-  </p-button>
+  <p-button label="Inicio"  icon="pi pi-home"       styleClass="btn-inicio"  routerLink="/app/home"></p-button>
+  <p-button label="Grupos"  icon="pi pi-users"       styleClass="btn-inicio"  routerLink="/app/group"></p-button>
+  <p-button label="Usuario" icon="pi pi-user"        styleClass="btn-inicio"  routerLink="/app/user"></p-button>
 
-  <p-button 
-    label="Cerrar sesión"
-    icon="pi pi-sign-out"
-    severity="danger"
-    routerLink="/login"
-    styleClass="w-full">
-  </p-button>
+  <p-button label="Cerrar sesión" icon="pi pi-sign-out" styleClass="btn-logout" routerLink="/login"></p-button>
+
+  <span class="sidebar-version">v1.0.0</span>
 
 </div>

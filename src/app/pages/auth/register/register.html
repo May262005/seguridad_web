@@ -1,61 +1,113 @@
+<!-- register.html -->
 <p-toast position="top-right"></p-toast>
 
-<div style="display:flex; justify-content:center; margin-top:30px; padding:16px;">
-  <div style="width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px;">
+<div class="register-container">
+  <div class="register-card">
 
-    <h2>Registro</h2>
+    <div class="register-header">
+      <h2>Registro</h2>
+    </div>
 
-    <form [formGroup]="registerForm" (ngSubmit)="register()" style="display:flex; flex-direction:column; gap:12px;">
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="register-form">
 
-      <input pInputText formControlName="username" placeholder="Usuario" />
-      <small class="p-error" *ngIf="username?.invalid && username?.touched">
-        Usuario obligatorio (mín. 3 caracteres).
-      </small>
+      <div class="field-group">
+        <label>Usuario</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon"><i class="pi pi-user"></i></span>
+          <input pInputText formControlName="username" placeholder="Usuario" />
+        </div>
+        <small class="p-error" *ngIf="username?.invalid && username?.touched">
+          Usuario obligatorio (mín. 3 caracteres).
+        </small>
+      </div>
 
-      <input pInputText formControlName="fullName" placeholder="Nombre completo" />
-      <small class="p-error" *ngIf="fullName?.invalid && fullName?.touched">
-        Nombre obligatorio.
-      </small>
+      <div class="field-group">
+        <label>Nombre completo</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon"><i class="pi pi-id-card"></i></span>
+          <input pInputText formControlName="fullName" placeholder="Nombre completo" />
+        </div>
+        <small class="p-error" *ngIf="fullName?.invalid && fullName?.touched">
+          Nombre obligatorio.
+        </small>
+      </div>
 
-      <input pInputText formControlName="email" placeholder="Correo electrónico" />
-      <small class="p-error" *ngIf="email?.invalid && email?.touched">
-        Correo inválido o vacío.
-      </small>
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon"><i class="pi pi-envelope"></i></span>
+          <input pInputText formControlName="email" placeholder="correo@ejemplo.com" />
+        </div>
+        <small class="p-error" *ngIf="email?.invalid && email?.touched">
+          Correo inválido o vacío.
+        </small>
+      </div>
 
-      <p-datepicker formControlName="birthDate" placeholder="Fecha de nacimiento"
-        dateFormat="dd/mm/yy" [showIcon]="true" [maxDate]="today">
-      </p-datepicker>
-      <small class="p-error" *ngIf="birthDate?.invalid && birthDate?.touched">
-        {{ birthDate?.errors?.['underage'] ? 'Debes ser mayor de 18 años.' : 'Fecha obligatoria.' }}
-      </small>
+      <!-- Fecha con wrapper manual para igualar altura y borde -->
+      <div class="field-group">
+        <label>Fecha de nacimiento</label>
+        <div class="datepicker-wrapper">
+          <p-datepicker formControlName="birthDate" placeholder="dd/mm/aaaa"
+            dateFormat="dd/mm/yy" [showIcon]="true" [maxDate]="today"
+            styleClass="datepicker-inner">
+          </p-datepicker>
+        </div>
+        <small class="p-error" *ngIf="birthDate?.invalid && birthDate?.touched">
+          {{ birthDate?.errors?.['underage'] ? 'Debes ser mayor de 18 años.' : 'Fecha obligatoria.' }}
+        </small>
+      </div>
 
-      <input pInputText formControlName="phone" placeholder="Teléfono (10 dígitos)" maxlength="10" />
-      <small class="p-error" *ngIf="phone?.invalid && phone?.touched">
-        Solo números, exactamente 10 dígitos.
-      </small>
+      <div class="field-group">
+        <label>Teléfono</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon"><i class="pi pi-phone"></i></span>
+          <input pInputText formControlName="phone" placeholder="10 dígitos" maxlength="10" />
+        </div>
+        <small class="p-error" *ngIf="phone?.invalid && phone?.touched">
+          Solo números, exactamente 10 dígitos.
+        </small>
+      </div>
 
-      <input pInputText formControlName="address" placeholder="Dirección" />
-      <small class="p-error" *ngIf="address?.invalid && address?.touched">
-        Dirección obligatoria.
-      </small>
+      <div class="field-group">
+        <label>Dirección</label>
+        <div class="p-inputgroup">
+          <span class="p-inputgroup-addon"><i class="pi pi-map-marker"></i></span>
+          <input pInputText formControlName="address" placeholder="Dirección" />
+        </div>
+        <small class="p-error" *ngIf="address?.invalid && address?.touched">
+          Dirección obligatoria.
+        </small>
+      </div>
 
-      <p-password formControlName="password" placeholder="Contraseña"
-        [toggleMask]="true" [feedback]="true">
-      </p-password>
-      <small class="p-error" *ngIf="password?.invalid && password?.touched">
-        Mín. 10 caracteres, mayúscula, minúscula, número y símbolo (!@#$%^&*).
-      </small>
+      <div class="field-group">
+        <label>Contraseña</label>
+        <div class="password-wrapper">
+          <span class="password-icon"><i class="pi pi-lock"></i></span>
+          <p-password formControlName="password" placeholder="Contraseña"
+            [toggleMask]="true" [feedback]="true" styleClass="password-inner">
+          </p-password>
+        </div>
+        <small class="p-error" *ngIf="password?.invalid && password?.touched">
+          Mín. 10 caracteres, mayúscula, minúscula, número y símbolo (!&#64;#$%^&*).
+        </small>
+      </div>
 
-      <p-password formControlName="confirmPassword" placeholder="Confirmar contraseña"
-        [feedback]="false" [toggleMask]="true">
-      </p-password>
-      <small class="p-error" *ngIf="confirmPassword?.touched && registerForm.errors?.['passwordsMismatch']">
-        Las contraseñas no coinciden.
-      </small>
+      <div class="field-group">
+        <label>Confirmar contraseña</label>
+        <div class="password-wrapper">
+          <span class="password-icon"><i class="pi pi-lock"></i></span>
+          <p-password formControlName="confirmPassword" placeholder="Confirmar contraseña"
+            [feedback]="false" [toggleMask]="true" styleClass="password-inner">
+          </p-password>
+        </div>
+        <small class="p-error" *ngIf="confirmPassword?.touched && registerForm.errors?.['passwordsMismatch']">
+          Las contraseñas no coinciden.
+        </small>
+      </div>
 
-      <div style="display:flex; gap:10px; margin-top:8px;">
-        <p-button label="Registrarse" type="submit" severity="success"></p-button>
-        <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+      <div class="botones">
+        <p-button label="Registrarse" type="submit" icon="pi pi-user-plus" styleClass="btn-registrar"></p-button>
+        <p-button label="Cancelar" routerLink="/" icon="pi pi-times" styleClass="btn-cancelar" [outlined]="true"></p-button>
       </div>
 
     </form>

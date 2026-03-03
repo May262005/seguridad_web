@@ -1,11 +1,47 @@
-.home{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:20px;
+:host {
+  --blush:  #dab0b2;
+  --rose:   #C97B8A;
+  --text:   #4a3a3c;
+  --cream:  #F2EDE4;
+  --white:  #ffffff;
+  --soft:   #9a8082;
 }
 
-.botones{
-    display:flex;
-    gap:10px;
+.page-card {
+  background: var(--white);
+  border: 1.5px solid var(--blush);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(201, 123, 138, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 420px;
+}
+
+.page-header {
+  background: var(--blush);
+  padding: 20px 28px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'Georgia', serif;
+}
+
+.page-body {
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.home-msg {
+  margin: 0;
+  font-size: 14px;
+  color: var(--soft);
+  text-align: center;
+  line-height: 1.6;
 }

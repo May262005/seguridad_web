@@ -1,8 +1,17 @@
-<h2>Bienvenido a la App</h2>
+<!-- home.html -->
+<div class="home-card">
 
-<p>Inicia sesión o regístrate para continuar</p>
+  <div class="home-header">
+    <h2>Bienvenido a la App</h2>
+  </div>
 
-<div style="display: flex; gap: 10px; margin-top: 15px;">
-  <p-button label="Login" routerLink="/login" severity="success"></p-button>
-  <p-button label="Registro" routerLink="/register" severity="success"></p-button>
+  <div class="home-body">
+    <p>Inicia sesión o regístrate para continuar</p>
+
+    <div class="home-botones">
+      <p-button label="Login"    routerLink="/login"    icon="pi pi-sign-in" styleClass="btn-login"></p-button>
+      <p-button label="Registro" routerLink="/register" icon="pi pi-user"    styleClass="btn-registro" [outlined]="true"></p-button>
+    </div>
+  </div>
+
 </div>

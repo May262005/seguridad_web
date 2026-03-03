@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { Landing } from './pages/landing/landing';
-import { Login } from './pages/auth/login/login';
-import { Register } from './pages/auth/register/register';
-import { Home } from './pages/home/home';
+import { Landing }        from './pages/landing/landing';
+import { Login }          from './pages/auth/login/login';
+import { Register }       from './pages/auth/register/register';
+import { Home }           from './pages/home/home';
+import { UserComponent }  from './pages/users/users';
+import { GroupComponent } from './pages/group/group';
 
 import { MainLayout } from './layout/main-layout/main-layout';
 
@@ -27,8 +29,15 @@ export const routes: Routes = [
       {
         path: 'home',
         component: Home
+      },
+      {
+        path: 'group',
+        component: GroupComponent
+      },
+      {
+        path: 'user',
+        component: UserComponent
       }
     ]
   }
-
 ];

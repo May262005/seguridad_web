@@ -7,5 +7,6 @@ import { ButtonModule } from 'primeng/button';
   standalone: true,
   imports: [ButtonModule, RouterModule],
   templateUrl: './landing.html',
+  styleUrl: './landing.css'
 })
 export class Landing {}

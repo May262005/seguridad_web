@@ -47,7 +47,8 @@ function adultAge(control: AbstractControl): ValidationErrors | null {
     CardModule, MessageModule, ToastModule, DatePickerModule
   ],
   providers: [MessageService],
-  templateUrl: './register.html'
+  templateUrl: './register.html',
+  styleUrl: './register.css'
 })
 export class Register {
   registerForm: FormGroup;

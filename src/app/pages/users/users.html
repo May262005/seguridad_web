@@ -1,0 +1,52 @@
+<!-- user.html -->
+<div class="page-card">
+
+  <div class="page-header">
+    <h2>Usuario</h2>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Perfil -->
+    <div class="profile-section">
+      <div class="profile-info">
+        <span class="profile-name">{{ user?.fullName }}</span>
+        <span class="profile-email">{{ user?.email }}</span>
+        <p-tag value="Activo" styleClass="profile-tag"></p-tag>
+      </div>
+    </div>
+
+    <p-divider></p-divider>
+
+    <!-- Datos -->
+    <div class="data-grid">
+
+      <div class="data-item">
+        <span class="data-label"><i class="pi pi-user"></i> Usuario</span>
+        <span class="data-value">{{ user?.username }}</span>
+      </div>
+
+      <div class="data-item">
+        <span class="data-label"><i class="pi pi-phone"></i> Teléfono</span>
+        <span class="data-value">{{ user?.phone }}</span>
+      </div>
+
+      <div class="data-item">
+        <span class="data-label"><i class="pi pi-map-marker"></i> Dirección</span>
+        <span class="data-value">{{ user?.address }}</span>
+      </div>
+
+      <div class="data-item">
+        <span class="data-label"><i class="pi pi-calendar"></i> Nacimiento</span>
+        <span class="data-value">{{ user?.birthDate | date:'dd/MM/yyyy' }}</span>
+      </div>
+
+    </div>
+
+    <!-- Botón editar -->
+    <div class="user-actions">
+      <p-button label="Editar perfil" icon="pi pi-pencil" styleClass="btn-editar"></p-button>
+    </div>
+
+  </div>
+</div>

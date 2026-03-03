@@ -1,31 +1,65 @@
-<div style="display:flex; justify-content:center; margin-top:60px;">
-  <div style="width:320px; display:flex; flex-direction:column; gap:12px;">
-    
-    <h2>Iniciar Sesión</h2>
+<!-- login.html -->
+<div class="login-container">
 
-    <form [formGroup]="loginForm" (ngSubmit)="login()" style="display:flex; flex-direction:column; gap:12px;">
-      
-      <input pInputText formControlName="email" placeholder="Correo electrónico" />
-      <small class="p-error" *ngIf="email?.invalid && email?.touched">
-        Correo inválido o vacío.
-      </small>
+  <p-card styleClass="login-card">
 
-      <p-password formControlName="password" placeholder="Contraseña"
-        [feedback]="false" [toggleMask]="true">
-      </p-password>
-      <small class="p-error" *ngIf="password?.invalid && password?.touched">
-        La contraseña es obligatoria.
-      </small>
+    <ng-template pTemplate="header">
+      <div class="login-header">
+        <h2>Iniciar Sesión</h2>
+      </div>
+    </ng-template>
 
-      <p-message *ngIf="loginError" severity="error" text="Credenciales incorrectas."></p-message>
+    <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
 
-      <div style="display:flex; gap:10px;">
-        <p-button label="Entrar" type="submit" severity="success"></p-button>
-        <p-button label="Cancelar" routerLink="/" severity="danger"></p-button>
+      <!-- Email -->
+      <div class="field-group">
+        <label for="email">Correo electrónico</label>
+        <div class="p-inputgroup input-row">
+          <span class="p-inputgroup-addon"><i class="pi pi-envelope"></i></span>
+          <input id="email" pInputText formControlName="email" placeholder="correo@ejemplo.com"
+            [ngClass]="{'ng-invalid ng-dirty': email?.invalid && email?.touched}" />
+        </div>
+        <small class="p-error" *ngIf="email?.invalid && email?.touched">
+          Correo inválido o vacío.
+        </small>
+      </div>
+
+      <!-- Password -->
+      <div class="field-group">
+        <label for="password">Contraseña</label>
+        <div class="password-wrapper input-row" [class.input-error]="password?.invalid && password?.touched">
+          <span class="password-icon"><i class="pi pi-lock"></i></span>
+          <p-password
+            inputId="password"
+            formControlName="password"
+            placeholder="••••••••"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="password-inner">
+          </p-password>
+        </div>
+        <small class="p-error" *ngIf="password?.invalid && password?.touched">
+          La contraseña es obligatoria.
+        </small>
+      </div>
+
+      <p-message *ngIf="loginError" severity="error" text="Credenciales incorrectas." styleClass="w-full"></p-message>
+
+      <!-- Botones centrados, mismo tamaño, sin ícono en Cancelar -->
+      <div class="botones">
+        <p-button label="Entrar"   type="submit" icon="pi pi-sign-in" styleClass="btn-entrar"   [loading]="isLoading"></p-button>
+        <p-button label="Cancelar" routerLink="/"                     styleClass="btn-cancelar" [outlined]="true" icon="pi pi-times"></p-button>
       </div>
 
     </form>
 
-    <small style="color:#888;">Prueba: admin@app.com / Admin@12345</small>
-  </div>
+    <ng-template pTemplate="footer">
+      <div class="demo-box">
+        <i class="pi pi-info-circle"></i>
+        <span>admin@app.com · Admin@12345</span>
+      </div>
+    </ng-template>
+
+  </p-card>
+
 </div>

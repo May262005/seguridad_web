@@ -1,22 +1,123 @@
-.sidebar{
-    width:230px;
-    height:100vh;
-    background:#1e293b;
-    color:white;
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
+:host {
+  --blush:  #dab0b2;
+  --rose:   #C97B8A;
+  --text:   #4a3a3c;
+  --cream:  #F2EDE4;
+  --white:  #ffffff;
+  --soft:   #9a8082;
 }
 
-.titulo{
-    text-align:center;
-    margin-bottom:10px;
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: var(--white);
+  border-right: 1.5px solid var(--blush);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  gap: 10px;
+  box-shadow: 2px 0 12px rgba(201, 123, 138, 0.08);
 }
 
-p.button{
-    width:230px;
-    height:100vh;
-    background:#1e293b;
-    color:white;
+.sidebar-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Georgia', serif;
+  padding: 12px 0 16px;
+  border-bottom: 1px solid var(--blush);
+  margin-bottom: 6px;
+}
+
+.sidebar-version {
+  margin-top: auto;
+  text-align: center;
+  font-size: 11px;
+  color: var(--blush);
+  padding-top: 12px;
+  border-top: 1px solid var(--blush);
+}
+
+/* Botón Inicio */
+:host ::ng-deep .btn-inicio.p-button,
+:host ::ng-deep .btn-inicio .p-button {
+  width: 100% !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  border: 1.5px solid var(--blush) !important;
+  color: var(--text) !important;
+  font-weight: 500;
+  font-size: 14px;
+  justify-content: flex-start !important;
+  padding: 10px 14px !important;
+  transition: background 0.2s;
+}
+
+:host ::ng-deep .btn-inicio.p-button .p-button-label,
+:host ::ng-deep .btn-inicio .p-button .p-button-label {
+  color: var(--text) !important;
+}
+
+:host ::ng-deep .btn-inicio.p-button .p-button-icon,
+:host ::ng-deep .btn-inicio .p-button .p-button-icon {
+  color: var(--rose) !important;
+}
+
+:host ::ng-deep .btn-inicio.p-button:hover,
+:host ::ng-deep .btn-inicio .p-button:hover {
+  background: var(--cream) !important;
+}
+
+/* Botón activo */
+:host ::ng-deep .btn-activo.p-button,
+:host ::ng-deep .btn-activo .p-button {
+  width: 100% !important;
+  border-radius: 10px !important;
+  background: var(--blush) !important;
+  border: none !important;
+  font-weight: 600;
+  font-size: 14px;
+  justify-content: flex-start !important;
+  padding: 10px 14px !important;
+}
+
+:host ::ng-deep .btn-activo.p-button .p-button-label,
+:host ::ng-deep .btn-activo .p-button .p-button-label {
+  color: var(--text) !important;
+}
+
+:host ::ng-deep .btn-activo.p-button .p-button-icon,
+:host ::ng-deep .btn-activo .p-button .p-button-icon {
+  color: var(--rose) !important;
+}
+
+/* Botón Cerrar sesión */
+:host ::ng-deep .btn-logout.p-button,
+:host ::ng-deep .btn-logout .p-button {
+  width: 100% !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  border: 1.5px solid var(--blush) !important;
+  font-weight: 500;
+  font-size: 14px;
+  justify-content: flex-start !important;
+  padding: 10px 14px !important;
+  margin-top: auto;
+  transition: background 0.2s;
+}
+
+:host ::ng-deep .btn-logout.p-button .p-button-label,
+:host ::ng-deep .btn-logout .p-button .p-button-label {
+  color: var(--soft) !important;
+}
+
+:host ::ng-deep .btn-logout.p-button .p-button-icon,
+:host ::ng-deep .btn-logout .p-button .p-button-icon {
+  color: var(--rose) !important;
+}
+
+:host ::ng-deep .btn-logout.p-button:hover,
+:host ::ng-deep .btn-logout .p-button:hover {
+  background: var(--cream) !important;
 }

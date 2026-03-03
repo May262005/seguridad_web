@@ -1,0 +1,38 @@
+<!-- group.html -->
+<div class="page-card">
+
+  <div class="page-header">
+    <h2>Grupos</h2>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-label">Total</span>
+        <span class="stat-value">{{ totalGroups }}</span>
+      </div>
+    </div>
+
+    <!-- Cards de grupos -->
+    <div class="cards-grid">
+      <p-card *ngFor="let group of groups" styleClass="group-card">
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <i class="pi pi-users"></i>
+            <span>{{ group.name }}</span>
+          </div>
+        </ng-template>
+        <p class="card-desc">{{ group.description }}</p>
+        <ng-template pTemplate="footer">
+          <div class="card-footer">
+            <p-tag [value]="group.level" styleClass="group-tag"></p-tag>
+            <p-button label="Ver" icon="pi pi-eye" styleClass="btn-ver"></p-button>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+
+  </div>
+</div>
