@@ -8,15 +8,6 @@
 
   display: block;
   width: 100%;
-  margin-top: 0;
-  padding-top: 0;
-}
-
-.page-wrapper {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100%;
 }
 
 .page-card {
@@ -25,7 +16,7 @@
   overflow: hidden;
   width: 100%;
   max-width: 520px;
-  margin-top: -320px;
+  margin: 0;
 }
 
 .page-header {
@@ -47,20 +38,10 @@
   gap: 20px;
 }
 
-/* ── Perfil ── */
 .profile-section {
   display: flex;
   align-items: center;
   gap: 18px;
-}
-
-:host ::ng-deep .profile-avatar {
-  width: 64px !important;
-  height: 64px !important;
-  background: var(--blush) !important;
-  color: var(--rose) !important;
-  font-size: 24px !important;
-  flex-shrink: 0;
 }
 
 .profile-info {
@@ -89,10 +70,8 @@
   width: fit-content;
 }
 
-/* ── Divider ── */
 :host ::ng-deep .p-divider::before { border-color: var(--blush) !important; }
 
-/* ── Data grid ── */
 .data-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -128,14 +107,12 @@
   font-weight: 500;
 }
 
-/* ── Acciones ── */
 .user-actions {
   display: flex;
   justify-content: flex-end;
 }
 
-:host ::ng-deep .btn-editar.p-button,
-:host ::ng-deep .btn-editar .p-button {
+:host ::ng-deep .btn-editar.p-button {
   background: var(--rose) !important;
   border: none !important;
   border-radius: 10px !important;
@@ -145,7 +122,84 @@
   padding: 0 20px !important;
 }
 
-:host ::ng-deep .btn-editar.p-button:hover,
-:host ::ng-deep .btn-editar .p-button:hover {
+:host ::ng-deep .btn-editar.p-button:hover {
   filter: brightness(0.92);
+}
+
+/* ── Dialog ── */
+:host ::ng-deep .user-dialog .p-dialog-header {
+  background: var(--cream) !important;
+  color: var(--text) !important;
+  font-family: 'Georgia', serif;
+  border-bottom: 1px solid var(--blush) !important;
+}
+
+:host ::ng-deep .user-dialog .p-dialog-content {
+  padding: 0 !important;
+}
+
+:host ::ng-deep .user-dialog .p-dialog-footer {
+  border-top: 1px solid var(--blush) !important;
+  background: var(--cream) !important;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.dialog-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--soft);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.field input {
+  width: 100%;
+  border: 1.5px solid var(--blush) !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  color: var(--text) !important;
+  padding: 8px 12px;
+}
+
+.date-input {
+  width: 100%;
+  border: 1.5px solid var(--blush);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-family: inherit;
+  outline: none;
+}
+
+.date-input:focus {
+  border-color: var(--rose);
+}
+
+:host ::ng-deep .btn-save.p-button {
+  background: var(--rose) !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+:host ::ng-deep .btn-cancel.p-button {
+  background: var(--cream) !important;
+  border: 1.5px solid var(--blush) !important;
+  color: var(--text) !important;
+  border-radius: 8px !important;
 }

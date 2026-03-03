@@ -1,4 +1,3 @@
-<!-- group.html -->
 <div class="page-card">
 
   <div class="page-header">
@@ -7,32 +6,106 @@
 
   <div class="page-body">
 
-    <!-- Stats row -->
-    <div class="stats-row">
-      <div class="stat-box">
-        <span class="stat-label">Total</span>
-        <span class="stat-value">{{ totalGroups }}</span>
+    <div class="top-row">
+      <div class="stats-row">
+        <div class="stat-box">
+          <span class="stat-label">Total</span>
+          <span class="stat-value">{{ totalGroups }}</span>
+        </div>
       </div>
+      <p-button label="Nuevo grupo" icon="pi pi-plus" styleClass="btn-nuevo" (onClick)="openNew()"></p-button>
     </div>
 
-    <!-- Cards de grupos -->
     <div class="cards-grid">
       <p-card *ngFor="let group of groups" styleClass="group-card">
+
         <ng-template pTemplate="header">
           <div class="card-header">
             <i class="pi pi-users"></i>
-            <span>{{ group.name }}</span>
+            <span>{{ group.nombre }}</span>
           </div>
         </ng-template>
-        <p class="card-desc">{{ group.description }}</p>
+
+        <p class="card-desc">{{ group.descripcion }}</p>
+
+        <div class="card-meta">
+          <span><i class="pi pi-user"></i> {{ group.autor }}</span>
+          <span><i class="pi pi-ticket"></i> {{ group.tickets }} tickets</span>
+          <span><i class="pi pi-user-plus"></i> {{ group.integrantes }} integrantes</span>
+        </div>
+
         <ng-template pTemplate="footer">
           <div class="card-footer">
-            <p-tag [value]="group.level" styleClass="group-tag"></p-tag>
-            <p-button label="Ver" icon="pi pi-eye" styleClass="btn-ver"></p-button>
+            <p-tag [value]="group.nivel" styleClass="group-tag"></p-tag>
+            <div class="card-actions">
+              <p-button icon="pi pi-eye"    styleClass="btn-icon"        (onClick)="openView(group)"></p-button>
+              <p-button icon="pi pi-pencil" styleClass="btn-icon"        (onClick)="openEdit(group)"></p-button>
+              <p-button icon="pi pi-trash"  styleClass="btn-icon danger" (onClick)="delete(group)"></p-button>
+            </div>
           </div>
         </ng-template>
+
       </p-card>
     </div>
 
   </div>
 </div>
+
+<p-dialog
+  [header]="dialogTitle()"
+  [(visible)]="showDialog"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="group-dialog"
+  [style]="{ width: '420px' }">
+
+  <div class="dialog-body">
+
+    <div class="field">
+      <label>Nombre</label>
+      <input pInputText [(ngModel)]="currentGroup.nombre" [disabled]="viewMode" placeholder="Nombre del grupo" />
+    </div>
+
+    <div class="field">
+      <label>Autor</label>
+      <input pInputText [(ngModel)]="currentGroup.autor" [disabled]="viewMode" placeholder="Autor" />
+    </div>
+
+    <div class="field">
+      <label>Nivel</label>
+      <p-select
+        [options]="nivelOptions"
+        [(ngModel)]="currentGroup.nivel"
+        [disabled]="viewMode"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="w-full">
+      </p-select>
+    </div>
+
+    <div class="field">
+      <label>Integrantes</label>
+      <p-inputNumber [(ngModel)]="currentGroup.integrantes" [disabled]="viewMode" [min]="0"></p-inputNumber>
+    </div>
+
+    <div class="field">
+      <label>Tickets</label>
+      <p-inputNumber [(ngModel)]="currentGroup.tickets" [disabled]="viewMode" [min]="0"></p-inputNumber>
+    </div>
+
+    <div class="field">
+      <label>Descripción</label>
+      <input pInputText [(ngModel)]="currentGroup.descripcion" [disabled]="viewMode" placeholder="Descripción" />
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cerrar"   styleClass="btn-cancel" (onClick)="showDialog = false"></p-button>
+    <p-button *ngIf="!viewMode" label="Guardar" styleClass="btn-save" (onClick)="save()"></p-button>
+  </ng-template>
+
+</p-dialog>
+
+<p-confirmDialog></p-confirmDialog>
