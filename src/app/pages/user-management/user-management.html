@@ -1,0 +1,145 @@
+<div class="user-management-container">
+  <div class="header">
+    <h1>Gestión de Usuarios</h1>
+    <p class="subtitle">Administra permisos y roles de usuarios</p>
+  </div>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-table [value]="users" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Avatar</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Permisos</th>
+        <th>Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-user>
+      <tr>
+        <td>
+          <p-avatar [label]="user.avatar" shape="circle" size="large"></p-avatar>
+        </td>
+        <td>
+          <div class="user-info">
+            <div><strong>{{ user.fullName }}</strong></div>
+            <div class="text-muted">@{{ user.username }}</div>
+          </div>
+        </td>
+        <td>{{ user.email }}</td>
+        <td>
+          <p-tag
+            [value]="getRoleLabel(user.role)"
+            [severity]="user.role === 'superAdmin' ? 'danger' : user.role === 'groupAdmin' ? 'warn' : 'info'">
+          </p-tag>
+        </td>
+        <td>
+          <div class="permission-count">
+            <span class="badge">{{ user.permissions.length }} permisos</span>
+          </div>
+        </td>
+        <td>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-warning p-button-sm"
+            (click)="openPermissionsDialog(user)"
+            pTooltip="Editar permisos"
+            tooltipPosition="top"
+            *ngIf="canManageUsers()">
+          </button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6">
+          <div class="empty-message">
+            <i class="pi pi-inbox"></i>
+            <p>No hay usuarios para mostrar</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="showPermissionsDialog"
+  [header]="'Gestionar Permisos - ' + (selectedUser?.fullName || '')"
+  [modal]="true"
+  [style]="{width: '50vw'}"
+  [breakpoints]="{'960px': '75vw', '640px': '90vw'}">
+
+  <div *ngIf="selectedUser" class="permissions-dialog">
+    <div class="dialog-header">
+      <p-avatar [label]="selectedUser.avatar" shape="circle"></p-avatar>
+      <div>
+        <div><strong>{{ selectedUser.fullName }}</strong></div>
+        <div class="text-muted">{{ selectedUser.email }} • {{ getRoleLabel(selectedUser.role) }}</div>
+      </div>
+    </div>
+
+    <div class="permission-groups">
+      <div *ngFor="let group of allPermissionGroups | keyvalue" class="permission-group">
+        <h3 class="group-title">{{ group.key }}</h3>
+        <div class="permissions-list">
+          <div *ngFor="let permission of group.value" class="permission-item">
+            <input
+              type="checkbox"
+              [id]="'perm-' + permission"
+              [checked]="hasPermission(permission)"
+              (change)="togglePermission(permission)"
+              [disabled]="!canEditPermission(permission)"
+              class="permission-checkbox" />
+            <label
+              [for]="'perm-' + permission"
+              class="permission-label"
+              [class.disabled]="!canEditPermission(permission)">
+              {{ permission }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="permission-summary">
+      <span class="summary-badge">{{ editingUserPermissions.length }} permisos seleccionados</span>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      type="button"
+      label="Cancelar"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="closePermissionsDialog()">
+    </button>
+    <button
+      pButton
+      type="button"
+      label="Restablecer a Rol"
+      icon="pi pi-refresh"
+      class="p-button-warning"
+      (click)="resetPermissions()"
+      *ngIf="canManageUsers()">
+    </button>
+    <button
+      pButton
+      type="button"
+      label="Guardar"
+      icon="pi pi-check"
+      class="p-button-success"
+      (click)="savePermissions()"
+      *ngIf="canManageUsers()">
+    </button>
+  </ng-template>
+</p-dialog>

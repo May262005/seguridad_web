@@ -1,0 +1,346 @@
+/* ─── Variables ─────────────────────────────── */
+:host {
+  --rose:  #C97B8A;
+  --blush: #dab0b2;
+  --cream: #F2EDE4;
+  --dark:  #4a3a3c;
+  --soft:  #9a8082;
+  display: block;
+  padding: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ─── Header ─────────────────────────────────── */
+.user-management-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  margin: 0;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--cream);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--soft);
+}
+
+/* ─── Table Wrapper ──────────────────────────── */
+::ng-deep {
+  .p-datatable {
+    background: #fff;
+    border: 1.5px solid #ede5e6;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .p-datatable-thead > tr > th {
+    background: var(--cream);
+    color: var(--dark);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 12px 16px;
+    border-color: #ede5e6;
+  }
+
+  .p-datatable-tbody > tr {
+    border-bottom-color: #ede5e6;
+
+    &:hover {
+      background: #fafaf8;
+    }
+
+    > td {
+      padding: 14px 16px;
+      color: var(--dark);
+      font-size: 13px;
+    }
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .p-paginator {
+    background: var(--cream);
+    border-color: #ede5e6;
+  }
+}
+
+/* ─── User Info ──────────────────────────────── */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-info > div:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.user-info > div:last-child {
+  font-size: 12px;
+  color: var(--soft);
+}
+
+/* ─── Permission Count ───────────────────────── */
+.permission-count {
+  display: inline-block;
+}
+
+.badge {
+  background: var(--cream);
+  color: var(--rose);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── Dialog Styles ──────────────────────────── */
+::ng-deep {
+  .p-dialog {
+    .p-dialog-header {
+      background: var(--cream);
+      border-color: #ede5e6;
+      padding: 16px;
+
+      .p-dialog-title {
+        color: var(--dark);
+        font-weight: 700;
+        font-size: 14px;
+      }
+    }
+
+    .p-dialog-content {
+      padding: 20px 16px;
+      color: var(--dark);
+    }
+
+    .p-dialog-footer {
+      border-top: 1.5px solid #ede5e6;
+      padding: 12px 16px;
+      background: #fafaf8;
+    }
+  }
+}
+
+/* ─── Dialog Header ──────────────────────────── */
+.dialog-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid #ede5e6;
+}
+
+.dialog-header > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dialog-header > div > div:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.dialog-header > div > div:last-child {
+  font-size: 12px;
+  color: var(--soft);
+}
+
+/* ─── Permission Groups ──────────────────────── */
+.permission-groups {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.permission-group {
+  background: var(--cream);
+  padding: 14px;
+  border-radius: 10px;
+  border-left: 4px solid var(--rose);
+}
+
+.group-title {
+  margin: 0 0 12px 0;
+  color: var(--dark);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.permissions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1.5px solid #ede5e6;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.permission-item:hover {
+  border-color: var(--rose);
+  background: #fde8f0;
+}
+
+.permission-label {
+  font-size: 12px;
+  color: var(--dark);
+  cursor: pointer;
+  font-family: 'Monaco', 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  font-weight: 500;
+}
+
+.permission-label.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.permission-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--rose);
+  margin-right: 4px;
+}
+
+.permission-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ─── Permission Summary ─────────────────────── */
+.permission-summary {
+  background: #e8f0fd;
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.summary-badge {
+  color: #7b9ec9;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* ─── Buttons ────────────────────────────────── */
+::ng-deep {
+  .p-button {
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    transition: all 0.15s;
+  }
+
+  .p-button-success {
+    background: #6db98a;
+    border-color: #6db98a;
+
+    &:hover {
+      background: #5ba975;
+    }
+  }
+
+  .p-button-warning {
+    background: var(--rose);
+    border-color: var(--rose);
+
+    &:hover {
+      background: #b56a78;
+    }
+  }
+
+  .p-button-text {
+    color: var(--soft);
+
+    &:hover {
+      background: var(--cream);
+    }
+  }
+
+  .p-button-sm {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* ─── Empty State ────────────────────────────── */
+.empty-message {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--soft);
+}
+
+.empty-message i {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 12px;
+  color: var(--blush);
+}
+
+.empty-message p {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    padding: 16px;
+  }
+
+  .header {
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .permissions-list {
+    grid-template-columns: 1fr;
+  }
+
+  ::ng-deep {
+    .p-datatable-thead > tr > th,
+    .p-datatable-tbody > tr > td {
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+  }
+}

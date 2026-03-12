@@ -1,0 +1,396 @@
+<!-- ticket-list.html -->
+<p-toast></p-toast>
+
+<div class="list-wrapper">
+
+  <!-- ── Header ──────────────────────────────── -->
+  <div class="list-header">
+    <div class="list-title-row">
+
+      <!-- Breadcrumb / contexto de grupo -->
+      <div class="title-left">
+        <a routerLink="/app/home" class="back-link">
+          <i class="pi pi-home"></i>
+        </a>
+        <i class="pi pi-chevron-right breadcrumb-sep"></i>
+
+        <ng-container *ngIf="activeGroupId; else noGroup">
+          <a class="back-link" (click)="clearGroupFilter()" style="cursor:pointer">
+            Mis grupos
+          </a>
+          <i class="pi pi-chevron-right breadcrumb-sep"></i>
+          <span class="page-title">
+            <i class="pi pi-users"></i> {{ activeGroupName }}
+          </span>
+        </ng-container>
+        <ng-template #noGroup>
+          <span class="page-title"><i class="pi pi-ticket"></i> Tickets</span>
+        </ng-template>
+      </div>
+
+      <!-- Toggle lista / kanban  +  Nuevo ticket -->
+      <div class="title-right">
+        <div class="view-toggle">
+          <button class="toggle-btn" [class.active]="viewMode === 'list'"   (click)="viewMode = 'list'">
+            <i class="pi pi-list"></i> Lista
+          </button>
+          <button class="toggle-btn" [class.active]="viewMode === 'kanban'" (click)="viewMode = 'kanban'">
+            <i class="pi pi-table"></i> Kanban
+          </button>
+        </div>
+        <p-button *ngIf="canCreateTicket"
+          label="Nuevo ticket" icon="pi pi-plus"
+          styleClass="btn-nuevo" (onClick)="openCreate()">
+        </p-button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Filtros ──────────────────────────────── -->
+  <div class="filters-bar">
+    <div class="search-wrap">
+      <i class="pi pi-search search-icon"></i>
+      <input pInputText [(ngModel)]="searchText" (ngModelChange)="applyFilters()"
+             placeholder="Buscar por título, asignado o #id…" class="search-input" />
+    </div>
+
+    <p-select [options]="statusOptions"   [(ngModel)]="filterStatus"   (ngModelChange)="applyFilters()"
+              optionLabel="label" optionValue="value" placeholder="Estado"
+              styleClass="filter-select">
+    </p-select>
+
+    <p-select [options]="priorityOptions" [(ngModel)]="filterPriority" (ngModelChange)="applyFilters()"
+              optionLabel="label" optionValue="value" placeholder="Prioridad"
+              styleClass="filter-select">
+    </p-select>
+
+    <p-select *hasPermission="'ticket:edit'"
+              [options]="memberOptions" [(ngModel)]="filterAssigned" (ngModelChange)="applyFilters()"
+              optionLabel="label" optionValue="value" placeholder="Asignado"
+              styleClass="filter-select">
+    </p-select>
+
+    <button *ngIf="activeFilterCount > 0" class="clear-btn" (click)="clearFilters()">
+      <i class="pi pi-times"></i> Limpiar ({{ activeFilterCount }})
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       VISTA LISTA
+       ══════════════════════════════════════════ -->
+  <ng-container *ngIf="viewMode === 'list'">
+
+    <!-- Tabla -->
+    <div class="table-wrap" *ngIf="filteredTickets.length > 0; else emptyState">
+      <table class="ticket-table">
+        <thead>
+          <tr>
+            <th class="th-sort" (click)="sortBy('id')">
+              # <i class="pi {{ sortIcon('id') }}"></i>
+            </th>
+            <th class="th-sort" (click)="sortBy('title')">
+              Título <i class="pi {{ sortIcon('title') }}"></i>
+            </th>
+            <th class="th-sort" (click)="sortBy('status')">
+              Estado <i class="pi {{ sortIcon('status') }}"></i>
+            </th>
+            <th class="th-sort" (click)="sortBy('priority')">
+              Prioridad <i class="pi {{ sortIcon('priority') }}"></i>
+            </th>
+            <th class="th-sort" (click)="sortBy('assignedTo')">
+              Asignado <i class="pi {{ sortIcon('assignedTo') }}"></i>
+            </th>
+            <th class="th-sort" (click)="sortBy('dueDate')">
+              Vence <i class="pi {{ sortIcon('dueDate') }}"></i>
+            </th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of pagedTickets" [class.row-overdue]="isOverdue(t)">
+
+            <td class="td-id">#{{ t.id }}</td>
+
+            <td class="td-title">
+              <a [routerLink]="['/app/ticket', t.id]" [queryParams]="ticketFromParams" queryParamsHandling="" class="title-link">{{ t.title }}</a>
+            </td>
+
+            <td>
+              <span class="badge-status"
+                    [style.background]="getStatusCfg(t.status).bg"
+                    [style.color]="getStatusCfg(t.status).color">
+                {{ getStatusCfg(t.status).label }}
+              </span>
+            </td>
+
+            <td>
+              <span class="badge-priority" [style.color]="getPriorityCfg(t.priority).color">
+                ● {{ getPriorityCfg(t.priority).label }}
+              </span>
+            </td>
+
+            <td class="td-assigned">
+              <span class="avatar-mini">{{ t.assignedTo.charAt(0) }}</span>
+              {{ t.assignedTo }}
+            </td>
+
+            <td class="td-date" [class.overdue-date]="isOverdue(t)">
+              <ng-container *ngIf="t.dueDate">
+                <i class="pi pi-calendar"></i> {{ t.dueDate | date:'dd/MM/yy' }}
+              </ng-container>
+            </td>
+
+            <td class="td-actions">
+              <a *hasPermission="'ticket:edit'"
+                 [routerLink]="['/app/ticket', t.id]" [queryParams]="ticketFromParams" queryParamsHandling="" class="action-btn edit" title="Editar">
+                <i class="pi pi-pencil"></i>
+              </a>
+              <button *hasPermission="'ticket:delete'"
+                      class="action-btn delete" (click)="deleteTicket(t)" title="Eliminar">
+                <i class="pi pi-trash"></i>
+              </button>
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" *ngIf="filteredTickets.length > pageSize">
+      <button class="page-btn" (click)="prevPage()" [disabled]="currentPage === 1">
+        <i class="pi pi-chevron-left"></i>
+      </button>
+      <button class="page-btn" *ngFor="let p of pages"
+              [class.active]="p === currentPage" (click)="currentPage = p">{{ p }}</button>
+      <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        <i class="pi pi-chevron-right"></i>
+      </button>
+      <span class="page-info">
+        {{ (currentPage - 1) * pageSize + 1 }}–{{ minVal(currentPage * pageSize, filteredTickets.length) }}
+        de {{ filteredTickets.length }}
+      </span>
+    </div>
+
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════
+       VISTA KANBAN  –  con drag & drop
+       ══════════════════════════════════════════ -->
+  <ng-container *ngIf="viewMode === 'kanban'">
+    <div class="kanban-scroll" *ngIf="filteredTickets.length > 0; else emptyState">
+      <div class="kanban-columns">
+
+        <div class="kanban-col"
+             *ngFor="let col of kanbanCols"
+             [class.drag-over]="dragOverCol === col.status"
+             (dragover)="onDragOver($event, col.status)"
+             (dragleave)="onDragLeave()"
+             (drop)="onDrop(col.status)">
+
+          <!-- Cabecera columna -->
+          <div class="col-header" [style.border-top-color]="col.color">
+            <div class="col-title-row">
+              <span class="col-icon" [style.background]="col.bg" [style.color]="col.color">
+                <i class="pi {{ col.icon }}"></i>
+              </span>
+              <span class="col-label" [style.color]="col.color">{{ col.label }}</span>
+            </div>
+            <span class="col-count" [style.background]="col.bg" [style.color]="col.color">
+              {{ ticketsByStatus(col.status).length }}
+            </span>
+          </div>
+
+          <!-- Tarjetas -->
+          <div class="col-body">
+            <div class="ticket-card"
+                 *ngFor="let t of ticketsByStatus(col.status)"
+                 [class.overdue]="isOverdue(t)"
+                 draggable="true"
+                 (dragstart)="onDragStart(t)"
+                 [routerLink]="['/app/ticket', t.id]"
+                 [queryParams]="ticketFromParams">
+
+              <div class="priority-strip" [style.background]="getPriorityCfg(t.priority).color"></div>
+
+              <div class="card-content">
+                <div class="card-top">
+                  <span class="card-id">#{{ t.id }}</span>
+                  <span class="priority-dot"
+                        [style.color]="getPriorityCfg(t.priority).color"
+                        [title]="getPriorityCfg(t.priority).label">●</span>
+                </div>
+                <p class="card-title">{{ t.title }}</p>
+                <div class="card-footer-row">
+                  <span class="card-assigned" *ngIf="t.assignedTo">
+                    <span class="assigned-avatar">{{ t.assignedTo.charAt(0) }}</span>
+                    {{ t.assignedTo.split(' ')[0] }}
+                  </span>
+                  <span class="card-date" *ngIf="t.dueDate" [class.overdue-text]="isOverdue(t)">
+                    <i class="pi pi-calendar"></i> {{ t.dueDate | date:'dd/MM' }}
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Drop hint cuando columna vacía -->
+            <div class="drop-hint" *ngIf="ticketsByStatus(col.status).length === 0">
+              <i class="pi pi-inbox"></i>
+              <span>Sin tickets</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Estado vacío -->
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <i class="pi pi-inbox"></i>
+      <span>No hay tickets que mostrar</span>
+    </div>
+  </ng-template>
+
+</div>
+
+
+<p-dialog [(visible)]="showDetail" [header]="'Ticket #' + (selectedTicket?.id ?? '')"
+          [modal]="true" [style]="{width:'480px'}" [draggable]="false">
+  <div class="detail-form" *ngIf="selectedTicket">
+    <div class="field">
+      <label>Título</label>
+      <input pInputText [(ngModel)]="selectedTicket.title" />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Estado</label>
+        <p-select [options]="detailStatusOptions" [(ngModel)]="selectedTicket.status"
+                  optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+      </div>
+      <div class="field">
+        <label>Prioridad</label>
+        <p-select [options]="detailPriorityOptions" [(ngModel)]="selectedTicket.priority"
+                  optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Asignado a</label>
+      <p-select [options]="detailMemberOptions" [(ngModel)]="selectedTicket.assignedTo"
+                optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" (onClick)="showDetail = false"></p-button>
+    <p-button label="Guardar"  (onClick)="saveDetail()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- ══════════════════════════════════════════
+     MODAL: Crear ticket en grupo
+     ══════════════════════════════════════════ -->
+<p-dialog header="Nuevo ticket en {{ activeGroupName }}"
+          [(visible)]="showCreate"
+          [modal]="true" [draggable]="false" [resizable]="false"
+          styleClass="create-dialog"
+          [style]="{ width: '520px' }">
+
+  <div class="create-body">
+
+    <!-- Grupo (solo lectura) -->
+    <div class="create-group-tag">
+      <i class="pi pi-users"></i>
+      <span>{{ activeGroupName }}</span>
+    </div>
+
+    <!-- Título * -->
+    <div class="create-field">
+      <label>Título <span class="req">*</span></label>
+      <input pInputText [(ngModel)]="newTicket.title"
+             placeholder="Describe brevemente el problema o tarea…"
+             class="create-input" />
+    </div>
+
+    <!-- Descripción -->
+    <div class="create-field">
+      <label>Descripción</label>
+      <textarea pTextarea [(ngModel)]="newTicket.description"
+                rows="3" placeholder="Detalla el contexto, pasos a reproducir, criterios de aceptación…"
+                class="create-textarea">
+      </textarea>
+    </div>
+
+    <!-- Estado + Prioridad -->
+    <div class="create-row">
+      <div class="create-field">
+        <label>Estado</label>
+        <p-select [options]="detailStatusOptions"
+                  [(ngModel)]="newTicket.status"
+                  optionLabel="label" optionValue="value"
+                  styleClass="create-select">
+        </p-select>
+      </div>
+      <div class="create-field">
+        <label>Prioridad</label>
+        <p-select [options]="detailPriorityOptions"
+                  [(ngModel)]="newTicket.priority"
+                  optionLabel="label" optionValue="value"
+                  styleClass="create-select">
+        </p-select>
+      </div>
+    </div>
+
+    <!-- Asignado a -->
+    <div class="create-field">
+      <label>Asignado a</label>
+      <p-select [options]="memberOptions"
+                [(ngModel)]="newTicket.assignedTo"
+                optionLabel="label" optionValue="value"
+                placeholder="Seleccionar miembro…"
+                styleClass="create-select">
+      </p-select>
+    </div>
+
+    <!-- Creado por (solo lectura) -->
+    <div class="create-field">
+      <label>Creado por</label>
+      <div class="create-author">
+        <span class="author-avatar">{{ auth.userAvatar() }}</span>
+        <span class="author-name">{{ auth.userFullName() }}</span>
+      </div>
+    </div>
+
+    <!-- Fecha inicio + Fecha límite -->
+    <div class="create-row">
+      <div class="create-field">
+        <label><i class="pi pi-calendar"></i> Fecha inicio</label>
+        <p-datepicker [(ngModel)]="newTicket.createdAt"
+                      [readonlyInput]="true"
+                      dateFormat="dd/mm/yy"
+                      [showIcon]="true"
+                      styleClass="create-date">
+        </p-datepicker>
+      </div>
+      <div class="create-field">
+        <label><i class="pi pi-clock"></i> Fecha límite</label>
+        <p-datepicker [(ngModel)]="newTicket.dueDate"
+                      dateFormat="dd/mm/yy"
+                      [showIcon]="true"
+                      [minDate]="newTicket.createdAt ?? today"
+                      placeholder="Opcional"
+                      styleClass="create-date">
+        </p-datepicker>
+      </div>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" styleClass="create-btn-cancel" (onClick)="showCreate = false"></p-button>
+    <p-button label="Crear ticket" icon="pi pi-plus" styleClass="create-btn-save" (onClick)="saveCreate()"></p-button>
+  </ng-template>
+
+</p-dialog>

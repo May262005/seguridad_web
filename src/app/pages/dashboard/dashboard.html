@@ -1,0 +1,122 @@
+<!-- dashboard.html -->
+<div class="dash-wrapper">
+
+  <!-- ── Header ── -->
+  <div class="dash-header">
+    <div class="header-right">
+    </div>
+  </div>
+
+  <!-- ── Stats ── -->
+  <div class="stats-row">
+    <div class="stat-total">
+      <span class="stat-big">{{ totalTickets }}</span>
+      <span class="stat-label">TICKETS TOTALES</span>
+      <div class="progress-bar"><div class="progress-fill" [style.width.%]="completionRate"></div></div>
+      <span class="progress-label">{{ completionRate }}% completado</span>
+    </div>
+    <div class="stat-card" *ngFor="let stat of stats" [style.border-left-color]="stat.color">
+      <div class="stat-icon" [style.background]="getStatusCfg(stat.status).bg">
+        <i class="pi {{ stat.icon }}" [style.color]="stat.color"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-num" [style.color]="stat.color">{{ stat.value }}</span>
+        <span class="stat-name">{{ stat.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Grid 2 col ── -->
+  <div class="dash-grid">
+
+    <!-- Tickets recientes -->
+    <div class="dash-section">
+      <div class="section-header">
+        <span class="section-title"><i class="pi pi-history"></i> Tickets recientes</span>
+        <a routerLink="/app/tickets" class="ver-todos">Ver todos →</a>
+      </div>
+      <div class="ticket-list">
+        <div class="ticket-row" *ngFor="let t of recentTickets"
+             [class.overdue]="isOverdue(t)" [routerLink]="['/app/ticket', t.id]">
+          <div class="ticket-left">
+            <span class="ticket-id">#{{ t.id }}</span>
+            <div class="ticket-info">
+              <span class="ticket-title">{{ t.title }}</span>
+              <span class="ticket-assigned"><i class="pi pi-user"></i> {{ t.assignedTo }}</span>
+            </div>
+          </div>
+          <div class="ticket-right">
+            <span class="badge-status"
+                  [style.background]="getStatusCfg(t.status).bg"
+                  [style.color]="getStatusCfg(t.status).color">
+              {{ getStatusCfg(t.status).label }}
+            </span>
+            <span class="badge-priority" [style.color]="getPriorityCfg(t.priority).color">
+              ● {{ getPriorityCfg(t.priority).label }}
+            </span>
+            <span class="ticket-date" *ngIf="t.dueDate" [class.overdue-date]="isOverdue(t)">
+              <i class="pi pi-calendar"></i> {{ t.dueDate | date:'dd/MM' }}
+            </span>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="recentTickets.length === 0">
+          <i class="pi pi-inbox"></i><span>Sin tickets recientes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mis tickets -->
+    <div class="dash-section">
+      <div class="section-header">
+        <span class="section-title"><i class="pi pi-bookmark"></i> Mis tickets</span>
+      </div>
+      <div class="ticket-list" *ngIf="myTickets.length > 0; else noTickets">
+        <div class="ticket-row" *ngFor="let t of myTickets"
+             [class.overdue]="isOverdue(t)" [routerLink]="['/app/ticket', t.id]">
+          <div class="ticket-left">
+            <span class="ticket-id">#{{ t.id }}</span>
+            <div class="ticket-info">
+              <span class="ticket-title">{{ t.title }}</span>
+              <span class="ticket-date" *ngIf="t.dueDate" [class.overdue-date]="isOverdue(t)">
+                <i class="pi pi-calendar"></i> Vence {{ t.dueDate | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+          <span class="badge-status"
+                [style.background]="getStatusCfg(t.status).bg"
+                [style.color]="getStatusCfg(t.status).color">
+            {{ getStatusCfg(t.status).label }}
+          </span>
+        </div>
+      </div>
+      <ng-template #noTickets>
+        <div class="empty-state"><i class="pi pi-inbox"></i><span>No tienes tickets asignados</span></div>
+      </ng-template>
+    </div>
+
+  </div>
+
+  <!-- ── Mis grupos → navegan a /app/list?groupId=X ── -->
+  <div class="dash-section" *ngIf="visibleGroups.length > 0">
+    <div class="section-header">
+      <span class="section-title"><i class="pi pi-users"></i> Mis grupos</span>
+    </div>
+    <div class="groups-row">
+      <div class="group-chip" *ngFor="let g of visibleGroups" (click)="openGroup(g)">
+        <div class="gchip-left">
+          <span class="gchip-nivel"
+                [style.background]="nivelColor[g.nivel] + '22'"
+                [style.color]="nivelColor[g.nivel]">{{ g.nivel }}</span>
+          <span class="gchip-name">{{ g.nombre }}</span>
+          <span class="gchip-desc">{{ g.descripcion }}</span>
+        </div>
+        <div class="gchip-right">
+          <span class="gchip-stat"><i class="pi pi-users"></i> {{ g.integrantes }}</span>
+          <span class="gchip-stat"><i class="pi pi-ticket"></i> {{ g.tickets }}</span>
+          <i class="pi pi-arrow-right gchip-arrow"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,285 @@
+<!-- ticket-detail.html -->
+<p-toast position="top-right"></p-toast>
+
+<!-- ── Not found ── -->
+<div class="not-found" *ngIf="notFound">
+  <i class="pi pi-inbox"></i>
+  <h2>Ticket no encontrado</h2>
+  <p>El ticket que buscas no existe o fue eliminado.</p>
+  <button class="btn-action primary" routerLink="/app/tickets">
+    <i class="pi pi-arrow-left"></i> Volver a la lista
+  </button>
+</div>
+
+<!-- ── Loading / sin ticket ── -->
+<div class="not-found" *ngIf="!ticket && !notFound">
+  <i class="pi pi-spin pi-spinner"></i>
+  <p>Cargando ticket...</p>
+</div>
+
+<!-- ── Contenido principal ── -->
+<div class="detail-wrapper" *ngIf="ticket">
+
+  <!-- Breadcrumb de contexto -->
+  <nav class="detail-breadcrumb">
+    <a routerLink="/app/home" class="bc-link"><i class="pi pi-home"></i> Inicio</a>
+
+    <ng-container *ngIf="fromCtx === 'home'">
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <span class="bc-current">Ticket #{{ ticket.id }}</span>
+    </ng-container>
+
+    <ng-container *ngIf="fromCtx === 'group'">
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <a class="bc-link" (click)="goBack()" style="cursor:pointer">
+        <i class="pi pi-users"></i> {{ fromGroupName }}
+      </a>
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <span class="bc-current">Ticket #{{ ticket.id }}</span>
+    </ng-container>
+
+    <ng-container *ngIf="fromCtx === 'list'">
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <a class="bc-link" (click)="goBack()" style="cursor:pointer">
+        <i class="pi pi-list"></i> Tickets
+      </a>
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <span class="bc-current">Ticket #{{ ticket.id }}</span>
+    </ng-container>
+
+    <ng-container *ngIf="fromCtx === 'board'">
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <a class="bc-link" (click)="goBack()" style="cursor:pointer">
+        <i class="pi pi-table"></i> Tablero
+      </a>
+      <i class="pi pi-chevron-right bc-sep"></i>
+      <span class="bc-current">Ticket #{{ ticket.id }}</span>
+    </ng-container>
+  </nav>
+
+  <div class="detail-grid">
+
+    <!-- ══════════════════════════════
+         COLUMNA PRINCIPAL
+         ══════════════════════════════ -->
+    <div class="main-col">
+
+      <!-- ── Cabecera ── -->
+      <div class="ticket-head">
+        <div class="head-top">
+          <span class="ticket-id">#{{ ticket.id }}</span>
+
+          <span class="status-badge"
+                [style.background]="getStatusCfg(ticket.status).bg"
+                [style.color]="getStatusCfg(ticket.status).color">
+            {{ getStatusCfg(ticket.status).label }}
+          </span>
+
+          <span class="priority-badge"
+                [style.background]="getPriority(ticket.priority).bg"
+                [style.color]="getPriority(ticket.priority).color">
+            {{ getPriority(ticket.priority).label }}
+          </span>
+
+          <span class="overdue-chip" *ngIf="isOverdue()">
+            <i class="pi pi-exclamation-triangle"></i> Vencido
+          </span>
+        </div>
+
+        <!-- Título — solo lectura -->
+        <h1 class="ticket-title" *ngIf="!isEditing">{{ ticket.title }}</h1>
+
+        <!-- Título — edición -->
+        <div class="field" *ngIf="isEditing && editTicket">
+          <label>Título</label>
+          <input pInputText [(ngModel)]="editTicket.title" class="edit-input" />
+        </div>
+
+        <!-- Acciones -->
+        <div class="head-actions">
+          <button class="btn-action secondary" (click)="goBack()">
+            <i class="pi {{ backIcon }}"></i> {{ backLabel }}
+          </button>
+          <button class="btn-action primary" *ngIf="!isEditing && canEditAll" (click)="startEdit()">
+            <i class="pi pi-pencil"></i> Editar
+          </button>
+          <button class="btn-action primary" *ngIf="isEditing" (click)="saveEdit()">
+            <i class="pi pi-check"></i> Guardar
+          </button>
+          <button class="btn-action secondary" *ngIf="isEditing" (click)="cancelEdit()">
+            <i class="pi pi-times"></i> Cancelar
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Descripción ── -->
+      <div class="section-card">
+        <div class="section-title"><i class="pi pi-align-left"></i> Descripción</div>
+        <p class="desc-text" *ngIf="!isEditing">{{ ticket.description || 'Sin descripción.' }}</p>
+        <textarea *ngIf="isEditing && editTicket"
+          pTextarea [(ngModel)]="editTicket.description"
+          rows="5" class="edit-textarea"
+          placeholder="Descripción del ticket...">
+        </textarea>
+      </div>
+
+      <!-- ── Cambio rápido (asignado sin permisos de edición) ── -->
+      <div class="section-card" *ngIf="isAssigned && !canEditAll">
+        <div class="section-title"><i class="pi pi-refresh"></i> Cambiar estado</div>
+        <div class="quick-status-btns">
+          <button class="qs-btn"
+                  *ngFor="let opt of statusOptions"
+                  [class.active]="ticket.status === opt.value"
+                  [style.border-color]="getStatusCfg(opt.value).color"
+                  [style.color]="ticket.status === opt.value ? '#fff' : getStatusCfg(opt.value).color"
+                  [style.background]="ticket.status === opt.value ? getStatusCfg(opt.value).color : getStatusCfg(opt.value).bg"
+                  (click)="quickStatus($any(opt.value))">
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Actividad / Comentarios ── -->
+      <div class="section-card activity-section">
+        <div class="section-title"><i class="pi pi-comments"></i> Actividad</div>
+
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let c of comments" [class.system-entry]="c.isSystem">
+            <div class="activity-avatar" [class.system-avatar]="c.isSystem">{{ c.avatar }}</div>
+            <div class="activity-body">
+              <div class="system-text" *ngIf="c.isSystem">
+                <i class="pi pi-history"></i>
+                {{ c.text }}
+                <span class="activity-time">{{ timeAgo(c.createdAt) }}</span>
+              </div>
+              <ng-container *ngIf="!c.isSystem">
+                <div class="activity-meta">
+                  <span class="activity-author">{{ c.author }}</span>
+                  <span class="activity-time">{{ timeAgo(c.createdAt) }}</span>
+                </div>
+                <div class="comment-bubble">{{ c.text }}</div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nueva entrada -->
+        <div class="comment-input-row" *ngIf="canComment">
+          <div class="comment-avatar">{{ auth.userAvatar() }}</div>
+          <div class="comment-box">
+            <textarea pTextarea [(ngModel)]="newComment" rows="2"
+              placeholder="Escribe un comentario… (Ctrl+Enter para enviar)"
+              class="comment-textarea"
+              (keydown.control.enter)="submitComment()">
+            </textarea>
+            <div class="comment-actions">
+              <button class="btn-action primary small" (click)="submitComment()" [disabled]="!newComment.trim()">
+                <i class="pi pi-send"></i> Comentar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         COLUMNA DERECHA — metadata
+         ══════════════════════════════ -->
+    <div class="meta-col">
+
+      <div class="meta-card">
+        <div class="section-title"><i class="pi pi-info-circle"></i> Detalles</div>
+
+        <!-- Estado -->
+        <div class="meta-row">
+          <span class="meta-label">Estado</span>
+          <span class="status-badge small" *ngIf="!isEditing"
+                [style.background]="getStatusCfg(ticket.status).bg"
+                [style.color]="getStatusCfg(ticket.status).color">
+            {{ getStatusCfg(ticket.status).label }}
+          </span>
+          <p-select *ngIf="isEditing && editTicket"
+            [options]="statusOptions" [(ngModel)]="editTicket.status"
+            optionLabel="label" optionValue="value" styleClass="meta-select">
+          </p-select>
+        </div>
+
+        <!-- Prioridad -->
+        <div class="meta-row">
+          <span class="meta-label">Prioridad</span>
+          <span class="priority-badge small" *ngIf="!isEditing"
+                [style.background]="getPriority(ticket.priority).bg"
+                [style.color]="getPriority(ticket.priority).color">
+            {{ getPriority(ticket.priority).label }}
+          </span>
+          <p-select *ngIf="isEditing && editTicket"
+            [options]="priorityOptions" [(ngModel)]="$any(editTicket).priority"
+            optionLabel="label" optionValue="value" styleClass="meta-select">
+          </p-select>
+        </div>
+
+        <!-- Asignado -->
+        <div class="meta-row">
+          <span class="meta-label">Asignado a</span>
+          <div class="assigned-display" *ngIf="!isEditing">
+            <span class="mini-avatar">{{ ticket.assignedTo.charAt(0) }}</span>
+            <span class="meta-value">{{ ticket.assignedTo || '—' }}</span>
+          </div>
+          <p-select *ngIf="isEditing && editTicket"
+            [options]="memberOptions" [(ngModel)]="editTicket.assignedTo"
+            optionLabel="label" optionValue="value" styleClass="meta-select">
+          </p-select>
+        </div>
+
+        <!-- Creado por -->
+        <div class="meta-row">
+          <span class="meta-label">Creado por</span>
+          <div class="assigned-display">
+            <span class="mini-avatar creator">{{ ticket.createdBy.charAt(0) }}</span>
+            <span class="meta-value">{{ ticket.createdBy }}</span>
+          </div>
+        </div>
+
+        <p-divider styleClass="meta-divider"></p-divider>
+
+        <!-- Fecha creación -->
+        <div class="meta-row">
+          <span class="meta-label"><i class="pi pi-calendar"></i> Creado</span>
+          <span class="meta-value">{{ ticket.createdAt | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <!-- Fecha límite -->
+        <div class="meta-row">
+          <span class="meta-label"><i class="pi pi-clock"></i> Vence</span>
+          <span class="meta-value" *ngIf="!isEditing" [class.overdue-text]="isOverdue()">
+            {{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yyyy') : '—' }}
+            <i class="pi pi-exclamation-triangle" *ngIf="isOverdue()"></i>
+          </span>
+          <p-datepicker *ngIf="isEditing && editTicket"
+            [(ngModel)]="editTicket.dueDate"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            styleClass="meta-datepicker">
+          </p-datepicker>
+        </div>
+
+      </div>
+
+      <!-- ── Referencia de prioridades ── -->
+      <div class="meta-card">
+        <div class="section-title"><i class="pi pi-star"></i> Niveles de prioridad</div>
+        <div class="priority-ref-list">
+          <div class="priority-ref-item" *ngFor="let p of priorities"
+               [class.current]="ticket.priority === p.value"
+               [style.border-left-color]="p.color">
+            <span class="pref-dot" [style.background]="p.color"></span>
+            <span class="pref-label" [style.color]="p.color">{{ p.label }}</span>
+            <span class="current-mark" *ngIf="ticket.priority === p.value">✓</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

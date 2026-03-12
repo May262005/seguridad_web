@@ -1,111 +1,283 @@
-<div class="page-card">
+<!-- group.html -->
+<p-toast position="top-right"></p-toast>
+<p-confirmDialog styleClass="confirm-dialog"></p-confirmDialog>
 
-  <div class="page-header">
-    <h2>Grupos</h2>
+<div class="groups-wrapper">
+
+  <!-- ── Header ─────────────────────────────── -->
+  <div class="groups-header">
+    <div class="header-left">
+      <h1 class="groups-title"><i class="pi pi-users"></i> Gestión de Grupos</h1>
+      <p class="groups-subtitle">Administra los equipos y sus niveles de acceso</p>
+    </div>
+    <button *hasPermission="'group:add'" class="btn-nuevo" (click)="openNew()">
+      <i class="pi pi-plus"></i> Nuevo grupo
+    </button>
   </div>
 
-  <div class="page-body">
-
-    <div class="top-row">
-      <div class="stats-row">
-        <div class="stat-box">
-          <span class="stat-label">Total</span>
-          <span class="stat-value">{{ totalGroups }}</span>
-        </div>
+  <!-- ── Stats ──────────────────────────────── -->
+  <div class="stats-strip">
+    <div class="stat-chip">
+      <span class="stat-ico"><i class="pi pi-users"></i></span>
+      <div class="stat-info">
+        <span class="stat-val">{{ totalGroups }}</span>
+        <span class="stat-lbl">Grupos</span>
       </div>
-      <p-button label="Nuevo grupo" icon="pi pi-plus" styleClass="btn-nuevo" (onClick)="openNew()"></p-button>
     </div>
+    <div class="stat-chip">
+      <span class="stat-ico green"><i class="pi pi-user-plus"></i></span>
+      <div class="stat-info">
+        <span class="stat-val">{{ totalMembers }}</span>
+        <span class="stat-lbl">Integrantes</span>
+      </div>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-ico rose"><i class="pi pi-ticket"></i></span>
+      <div class="stat-info">
+        <span class="stat-val">{{ totalTickets }}</span>
+        <span class="stat-lbl">Tickets activos</span>
+      </div>
+    </div>
+  </div>
 
-    <div class="cards-grid">
-      <p-card *ngFor="let group of groups" styleClass="group-card">
+  <!-- ── Buscador ───────────────────────────── -->
+  <div class="search-bar">
+    <i class="pi pi-search search-ico"></i>
+    <input pInputText [(ngModel)]="searchText"
+           placeholder="Buscar por nombre, autor o nivel…"
+           class="search-input" />
+    <button *ngIf="searchText" class="clear-search" (click)="searchText = ''">
+      <i class="pi pi-times"></i>
+    </button>
+  </div>
 
-        <ng-template pTemplate="header">
-          <div class="card-header">
-            <i class="pi pi-users"></i>
-            <span>{{ group.nombre }}</span>
-          </div>
-        </ng-template>
+  <!-- ── Grid de tarjetas ───────────────────── -->
+  <div class="cards-grid" *ngIf="filteredGroups.length > 0; else emptyState">
+    <div class="group-card" *ngFor="let group of filteredGroups">
 
-        <p class="card-desc">{{ group.descripcion }}</p>
-
-        <div class="card-meta">
-          <span><i class="pi pi-user"></i> {{ group.autor }}</span>
-          <span><i class="pi pi-ticket"></i> {{ group.tickets }} tickets</span>
-          <span><i class="pi pi-user-plus"></i> {{ group.integrantes }} integrantes</span>
-        </div>
-
-        <ng-template pTemplate="footer">
-          <div class="card-footer">
-            <p-tag [value]="group.nivel" styleClass="group-tag"></p-tag>
-            <div class="card-actions">
-              <p-button icon="pi pi-eye"    styleClass="btn-icon"        (onClick)="openView(group)"></p-button>
-              <p-button icon="pi pi-pencil" styleClass="btn-icon"        (onClick)="openEdit(group)"></p-button>
-              <p-button icon="pi pi-trash"  styleClass="btn-icon danger" (onClick)="delete(group)"></p-button>
+      <div class="gc-head"
+           [style.background]="nivelColor(group.nivel).bg"
+           [style.border-color]="nivelColor(group.nivel).color">
+        <div class="gc-head-left">
+          <span class="gc-avatar" [style.background]="nivelColor(group.nivel).color">
+            {{ group.nombre.charAt(0) }}
+          </span>
+          <div>
+            <div class="gc-name">{{ group.nombre }}</div>
+            <div class="gc-nivel" [style.color]="nivelColor(group.nivel).color">
+              <i class="pi pi-circle-fill" style="font-size:7px"></i> {{ group.nivel }}
             </div>
           </div>
-        </ng-template>
+        </div>
+        <span class="gc-id">#{{ group.id }}</span>
+      </div>
 
-      </p-card>
+      <div class="gc-body">
+        <p class="gc-desc">{{ group.descripcion || 'Sin descripción.' }}</p>
+
+        <div class="gc-meta">
+          <span class="gc-meta-item"><i class="pi pi-user"></i> {{ group.autor }}</span>
+          <span class="gc-meta-item"><i class="pi pi-calendar"></i> {{ group.createdAt | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="gc-counters">
+          <!-- Integrantes — abre dialog de miembros -->
+          <button class="gc-counter-btn" (click)="openMembers(group)">
+            <i class="pi pi-user-plus"></i>
+            <span class="gc-counter-val">{{ group.members.length }}</span>
+            <span class="gc-counter-lbl">integrantes</span>
+          </button>
+          <div class="gc-divider"></div>
+          <!-- Tickets — solo lectura desde service -->
+          <div class="gc-counter">
+            <i class="pi pi-ticket"></i>
+            <span class="gc-counter-val">{{ ticketCount(group.id) }}</span>
+            <span class="gc-counter-lbl">tickets</span>
+          </div>
+        </div>
+
+        <!-- Avatares de miembros (primeros 5) -->
+        <div class="gc-avatars" *ngIf="group.members.length > 0">
+          <span class="member-avatar"
+                *ngFor="let m of group.members.slice(0, 5)"
+                [title]="m.fullName + ' · ' + m.email">
+            {{ m.avatar }}
+          </span>
+          <span class="member-more" *ngIf="group.members.length > 5">
+            +{{ group.members.length - 5 }}
+          </span>
+        </div>
+      </div>
+
+      <div class="gc-footer">
+        <button class="gc-btn members" (click)="openMembers(group)" title="Gestionar miembros">
+          <i class="pi pi-users"></i>
+        </button>
+        <button class="gc-btn view" (click)="openView(group)" title="Ver detalle">
+          <i class="pi pi-eye"></i>
+        </button>
+        <button *hasPermission="'group:edit'" class="gc-btn edit" (click)="openEdit(group)" title="Editar">
+          <i class="pi pi-pencil"></i>
+        </button>
+        <button *hasPermission="'group:delete'" class="gc-btn del" (click)="delete(group)" title="Eliminar">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+
     </div>
-
   </div>
+
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <i class="pi pi-users"></i>
+      <p>No se encontraron grupos</p>
+    </div>
+  </ng-template>
+
 </div>
 
-<p-dialog
-  [header]="dialogTitle()"
-  [(visible)]="showDialog"
-  [modal]="true"
-  [draggable]="false"
-  [resizable]="false"
-  styleClass="group-dialog"
-  [style]="{ width: '420px' }">
+<!-- ══════════════════════════
+     DIALOG: Ver / Crear / Editar grupo
+     ══════════════════════════ -->
+<p-dialog [header]="dialogTitle" [(visible)]="showDialog"
+          [modal]="true" [draggable]="false" [resizable]="false"
+          styleClass="group-dialog" [style]="{ width: '460px' }">
 
   <div class="dialog-body">
-
-    <div class="field">
-      <label>Nombre</label>
-      <input pInputText [(ngModel)]="currentGroup.nombre" [disabled]="viewMode" placeholder="Nombre del grupo" />
+    <div class="dialog-nivel-badge"
+         [style.background]="nivelColor(currentGroup.nivel).bg"
+         [style.color]="nivelColor(currentGroup.nivel).color"
+         [style.border-color]="nivelColor(currentGroup.nivel).color">
+      <i class="pi pi-circle-fill" style="font-size:8px"></i> {{ currentGroup.nivel }}
     </div>
 
-    <div class="field">
-      <label>Autor</label>
-      <input pInputText [(ngModel)]="currentGroup.autor" [disabled]="viewMode" placeholder="Autor" />
+    <div class="d-field">
+      <label>Nombre <span *ngIf="!viewMode" class="req">*</span></label>
+      <input pInputText [(ngModel)]="currentGroup.nombre" [disabled]="viewMode"
+             placeholder="Nombre del grupo" class="d-input" />
     </div>
-
-    <div class="field">
-      <label>Nivel</label>
-      <p-select
-        [options]="nivelOptions"
-        [(ngModel)]="currentGroup.nivel"
-        [disabled]="viewMode"
-        optionLabel="label"
-        optionValue="value"
-        styleClass="w-full">
-      </p-select>
-    </div>
-
-    <div class="field">
-      <label>Integrantes</label>
-      <p-inputNumber [(ngModel)]="currentGroup.integrantes" [disabled]="viewMode" [min]="0"></p-inputNumber>
-    </div>
-
-    <div class="field">
-      <label>Tickets</label>
-      <p-inputNumber [(ngModel)]="currentGroup.tickets" [disabled]="viewMode" [min]="0"></p-inputNumber>
-    </div>
-
-    <div class="field">
+    <div class="d-field">
       <label>Descripción</label>
-      <input pInputText [(ngModel)]="currentGroup.descripcion" [disabled]="viewMode" placeholder="Descripción" />
+      <input pInputText [(ngModel)]="currentGroup.descripcion" [disabled]="viewMode"
+             placeholder="Breve descripción" class="d-input" />
+    </div>
+    <div class="d-row">
+      <div class="d-field">
+        <label>Nivel</label>
+        <p-select [options]="nivelOptions" [(ngModel)]="currentGroup.nivel"
+                  [disabled]="viewMode" optionLabel="label" optionValue="value"
+                  styleClass="d-select"></p-select>
+      </div>
+      <div class="d-field">
+        <label>Autor</label>
+        <input pInputText [(ngModel)]="currentGroup.autor" [disabled]="viewMode"
+               placeholder="Responsable" class="d-input" />
+      </div>
+    </div>
+
+    <!-- Readonly: integrantes y tickets del service -->
+    <div class="d-row" *ngIf="viewMode">
+      <div class="d-field">
+        <label><i class="pi pi-user-plus"></i> Integrantes</label>
+        <div class="d-readonly">{{ currentGroup.members.length }}</div>
+      </div>
+      <div class="d-field">
+        <label><i class="pi pi-ticket"></i> Tickets</label>
+        <div class="d-readonly">{{ ticketCount(currentGroup.id) }}</div>
+      </div>
+    </div>
+
+    <div class="d-field" *ngIf="viewMode">
+      <label><i class="pi pi-calendar"></i> Creado</label>
+      <div class="d-readonly">{{ currentGroup.createdAt | date:'dd/MM/yyyy' }}</div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button class="d-btn cancel" (click)="showDialog = false">Cerrar</button>
+    <button *ngIf="!viewMode" class="d-btn save" (click)="save()">
+      <i class="pi pi-check"></i>
+      {{ isEditing ? 'Guardar cambios' : 'Crear grupo' }}
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- ══════════════════════════
+     DIALOG: Gestionar miembros
+     ══════════════════════════ -->
+<p-dialog [header]="'Miembros · ' + (membersGroup?.nombre ?? '')"
+          [(visible)]="showMembers"
+          [modal]="true" [draggable]="false" [resizable]="false"
+          styleClass="members-dialog" [style]="{ width: '520px' }">
+
+  <div class="members-body" *ngIf="membersGroup">
+
+    <!-- Agregar por email -->
+    <div class="add-member-section">
+      <div class="add-member-title">
+        <i class="pi pi-user-plus"></i> Agregar miembro
+      </div>
+
+      <div class="add-member-form">
+        <div class="add-field">
+          <label>Email <span class="req">*</span></label>
+          <input pInputText [(ngModel)]="newMemberEmail"
+                 placeholder="correo@empresa.com"
+                 class="add-input"
+                 (keydown.enter)="addMember()" />
+        </div>
+        <div class="add-field">
+          <label>Nombre (opcional)</label>
+          <input pInputText [(ngModel)]="newMemberName"
+                 placeholder="Nombre visible"
+                 class="add-input" />
+        </div>
+        <div class="add-field">
+          <label>Rol</label>
+          <p-select [options]="memberRoleOptions"
+                    [(ngModel)]="newMemberRole"
+                    optionLabel="label" optionValue="value"
+                    styleClass="add-select">
+          </p-select>
+        </div>
+        <button class="btn-add-member" (click)="addMember()">
+          <i class="pi pi-plus"></i> Agregar
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista de miembros actuales -->
+    <div class="members-list-section">
+      <div class="members-list-title">
+        <i class="pi pi-users"></i>
+        {{ membersGroup.members.length }} miembro{{ membersGroup.members.length !== 1 ? 's' : '' }}
+      </div>
+
+      <div class="members-list" *ngIf="membersGroup.members.length > 0; else noMembers">
+        <div class="member-row" *ngFor="let m of membersGroup.members">
+          <span class="member-av">{{ m.avatar }}</span>
+          <div class="member-info">
+            <span class="member-name">{{ m.fullName }}</span>
+            <span class="member-email">{{ m.email }}</span>
+          </div>
+          <span class="member-role-chip">{{ rolLabel(m.role) }}</span>
+          <button class="btn-remove" (click)="removeMember(m)" title="Remover">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <ng-template #noMembers>
+        <div class="no-members">
+          <i class="pi pi-user-minus"></i>
+          <span>Sin miembros en este grupo</span>
+        </div>
+      </ng-template>
     </div>
 
   </div>
 
   <ng-template pTemplate="footer">
-    <p-button label="Cerrar"   styleClass="btn-cancel" (onClick)="showDialog = false"></p-button>
-    <p-button *ngIf="!viewMode" label="Guardar" styleClass="btn-save" (onClick)="save()"></p-button>
+    <button class="d-btn cancel" (click)="showMembers = false">Cerrar</button>
   </ng-template>
-
 </p-dialog>
-
-<p-confirmDialog></p-confirmDialog>

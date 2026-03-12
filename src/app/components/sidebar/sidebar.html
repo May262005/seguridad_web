@@ -1,13 +1,62 @@
+<!-- sidebar.html -->
 <div class="sidebar">
 
-  <div class="sidebar-title">Nombre App</div>
+  <div class="sidebar-brand">
+    <span class="brand-icon"><i class="pi pi-ticket"></i></span>
+    <span class="brand-name">TicketApp</span>
+  </div>
 
-  <p-button label="Inicio"  icon="pi pi-home"       styleClass="btn-inicio"  routerLink="/app/home"></p-button>
-  <p-button label="Grupos"  icon="pi pi-users"       styleClass="btn-inicio"  routerLink="/app/group"></p-button>
-  <p-button label="Usuario" icon="pi pi-user"        styleClass="btn-inicio"  routerLink="/app/user"></p-button>
+  <!-- Usuario logueado -->
+  <div class="sidebar-user" *ngIf="auth.currentUser()">
+    <span class="user-av">{{ auth.userAvatar() }}</span>
+    <div class="user-meta">
+      <span class="user-name">{{ auth.userFullName() }}</span>
+      <span class="user-role">{{ auth.currentUser()?.role }}</span>
+    </div>
+  </div>
 
-  <p-button label="Cerrar sesión" icon="pi pi-sign-out" styleClass="btn-logout" routerLink="/login"></p-button>
+  <div class="sidebar-sep"></div>
 
-  <span class="sidebar-version">v1.0.0</span>
+  <!-- Navegación -->
+  <nav class="sidebar-nav">
+
+    <a routerLink="/app/home" routerLinkActive="active" class="nav-item">
+      <i class="pi pi-home"></i>
+      <span>Inicio</span>
+    </a>
+    
+    <a routerLink="/app/user" routerLinkActive="active" class="nav-item">
+        <i class="pi pi-user-edit"></i>
+        <span>Perfil</span>
+      </a>
+
+    <div class="sidebar-sep" *ngIf="auth.hasPermission('group:view') || auth.hasPermission('user:manage-permissions') || auth.hasPermission('user:view') || auth.isSuperAdmin()"></div>
+
+    <!-- Administración: Grupos y Gestión de Usuarios -->
+    <ng-container *ngIf="auth.hasPermission('group:view') || auth.hasPermission('user:manage-permissions') || auth.hasPermission('user:view') || auth.isSuperAdmin()">
+      <div class="nav-section-label">Administración</div>
+
+      <a routerLink="/app/group" routerLinkActive="active" class="nav-item" 
+        *ngIf="auth.hasPermission('group:view') || auth.isSuperAdmin()">
+        <i class="pi pi-users"></i>
+        <span>Grupos</span>
+      </a>
+
+      <a routerLink="/app/user-management" routerLinkActive="active" class="nav-item" 
+        *ngIf="auth.hasPermission('user:view') || auth.hasPermission('user:manage-permissions') || auth.isSuperAdmin()">
+        <i class="pi pi-cog"></i>
+        <span>Gestión de Usuarios</span>
+      </a>
+    </ng-container>
+
+  </nav>
+
+  <div class="sidebar-bottom">
+    <span class="sidebar-version">v1.0.0</span>
+    <button class="btn-logout" (click)="logout()">
+      <i class="pi pi-sign-out"></i>
+      <span>Cerrar sesión</span>
+    </button>
+  </div>
 
 </div>

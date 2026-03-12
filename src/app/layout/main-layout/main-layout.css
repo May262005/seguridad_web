@@ -10,12 +10,11 @@
 .layout {
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
 .contenido {
   flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   overflow-y: auto;
+  overflow-x: hidden;
 }
