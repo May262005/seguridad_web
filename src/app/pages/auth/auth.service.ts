@@ -21,6 +21,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ],
   member: [
     'ticket:view', 'ticket:comment', 'ticket:status',
+    'group:view',
   ],
   readonly: [
     'ticket:view',
