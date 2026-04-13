@@ -1,0 +1,367 @@
+.profile-container {
+  display: block;
+  padding: 24px;
+  color: #4a3a3c;
+  min-height: 100vh;
+}
+
+/* ── Card principal ── */
+.profile-card {
+  max-width: 800px;
+  width: 100%;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(201, 123, 138, 0.25);
+  box-shadow: 0 1px 4px rgba(74, 58, 60, 0.07);
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.profile-card:hover {
+  box-shadow: 0 4px 12px rgba(74, 58, 60, 0.12);
+}
+
+/* ── Header ── */
+.profile-header {
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid rgba(218, 176, 178, 0.35);
+}
+
+.btn-back {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(218, 176, 178, 0.18);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #C97B8A;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  background: rgba(201, 123, 138, 0.25);
+  transform: translateX(-2px);
+}
+
+/* ── Avatar ── */
+.avatar-large {
+  width: 72px;
+  height: 72px;
+  background: rgba(218, 176, 178, 0.18);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #C97B8A;
+  transition: all 0.3s ease;
+}
+
+.profile-card:hover .avatar-large {
+  background: rgba(201, 123, 138, 0.25);
+  transform: scale(1.05);
+}
+
+.profile-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4a3a3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.profile-header h2::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #C97B8A;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.user-role {
+  margin: 0;
+  font-size: 11px;
+  color: #9a8082;
+}
+
+/* ── Info ── */
+.profile-info {
+  padding: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Info items como ticket-row del dashboard */
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: #F2EDE4;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.info-item:hover {
+  background: rgba(218, 176, 178, 0.25);
+  transform: translateX(3px);
+}
+
+/* Icono como stat-icon del dashboard */
+.info-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover .info-icon {
+  background: rgba(201, 123, 138, 0.15);
+  transform: scale(1.05);
+}
+
+.info-icon i {
+  font-size: 16px;
+  color: #C97B8A;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.info-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #9a8082;
+  white-space: nowrap;
+}
+
+.info-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a3a3c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Acciones ── */
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid rgba(218, 176, 178, 0.35);
+}
+
+/* Botón primario igual al btn-nuevo-ticket */
+.btn-edit {
+  background: linear-gradient(135deg, #C97B8A 0%, #dab0b2 100%);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(201, 123, 138, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.btn-edit i {
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.btn-edit:hover {
+  background: linear-gradient(135deg, #b86a7a 0%, #c9a0a2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(201, 123, 138, 0.4);
+}
+
+.btn-edit:hover i {
+  transform: rotate(15deg);
+}
+
+.btn-edit:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(201, 123, 138, 0.3);
+}
+
+/* Botón secundario igual al btn-password */
+.btn-password {
+  background: rgba(218, 176, 178, 0.18);
+  color: #C97B8A;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-password i {
+  font-size: 14px;
+}
+
+.btn-password:hover {
+  background: rgba(201, 123, 138, 0.25);
+  transform: translateY(-2px);
+}
+
+.btn-password:active {
+  transform: translateY(0);
+}
+
+/* ── Loading ── */
+.loading-state {
+  text-align: center;
+  padding: 36px 20px;
+  color: #9a8082;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.loading-state i {
+  font-size: 40px;
+  color: #dab0b2;
+}
+
+/* ── Formularios ── */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a3a3c;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  border: 1px solid rgba(201, 123, 138, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #4a3a3c;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: #C97B8A;
+  box-shadow: 0 0 0 3px rgba(201, 123, 138, 0.12);
+}
+
+.w-full { width: 100%; }
+
+.p-error {
+  font-size: 11px;
+  color: #c0626e;
+  margin-top: 2px;
+}
+
+/* ── Animación ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .profile-container {
+    padding: 16px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .btn-edit,
+  .btn-password {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .btn-edit span,
+  .btn-password span {
+    display: none;
+  }
+
+  .btn-edit,
+  .btn-password {
+    padding: 10px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+
+  .btn-edit i,
+  .btn-password i {
+    margin: 0;
+  }
+}

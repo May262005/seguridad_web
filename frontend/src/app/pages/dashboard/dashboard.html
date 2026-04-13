@@ -1,0 +1,254 @@
+<p-toast></p-toast>
+
+<div class="dash-header">
+  <div class="header-right">
+    <!-- Solo admins globales ven este botón -->
+    <button
+      *ngIf="canCreateTicket()"
+      class="btn-nuevo-ticket"
+      (click)="openCreateTicketModal()">
+      <i class="pi pi-plus"></i>
+      <span>Nuevo Ticket</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Stats generales ───────────────────────────────────── -->
+<div class="stats-row">
+  <div class="stat-total">
+    <span class="stat-big">{{ totalTickets }}</span>
+    <span class="stat-label">TICKETS TOTALES</span>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="completionRate"></div>
+    </div>
+    <span class="progress-label">{{ completionRate }}% completado</span>
+  </div>
+
+  <div class="stat-card" *ngFor="let stat of stats">
+    <div class="stat-icon" [style.background]="stat.color + '22'">
+      <i class="pi {{ stat.icon }}" [style.color]="stat.color"></i>
+    </div>
+    <div class="stat-info">
+      <span class="stat-num" [style.color]="stat.color">{{ stat.value }}</span>
+      <span class="stat-name">{{ stat.label }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Grid tickets recientes / mis tickets ─────────────── -->
+<div class="dash-grid" *ngIf="canViewTickets()">
+
+  <div class="dash-section">
+    <div class="section-header">
+      <span class="section-title">
+        <span class="section-dot"></span> Tickets recientes
+      </span>
+      <a routerLink="/app/tickets" class="ver-todos">Ver todos →</a>
+    </div>
+    <div class="ticket-list">
+      <div
+        class="ticket-row"
+        *ngFor="let t of recentTickets"
+        [class.overdue]="isOverdue(t)"
+        (click)="verTicket(t)">
+        <div class="ticket-left">
+          <span class="ticket-id">#{{ t.id | slice:0:8 }}</span>
+          <div class="ticket-info">
+            <span class="ticket-title">{{ t.title }}</span>
+            <span class="ticket-assigned"><i class="pi pi-user"></i> {{ t.assignedTo }}</span>
+          </div>
+        </div>
+        <div class="ticket-right">
+          <span class="badge-status"
+            [style.background]="t.statusColor + '22'"
+            [style.color]="t.statusColor">
+            {{ t.status }}
+          </span>
+          <span class="badge-priority" [style.color]="t.priorityColor">
+            ● {{ t.priority }}
+          </span>
+          <span class="ticket-date" *ngIf="t.dueDate" [class.overdue-date]="isOverdue(t)">
+            <i class="pi pi-calendar"></i> {{ t.dueDate | date:'dd/MM' }}
+          </span>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="recentTickets.length === 0">
+        <i class="pi pi-inbox"></i>
+        <span>Sin tickets recientes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="section-header">
+      <span class="section-title">
+        <span class="section-dot"></span> Mis tickets
+      </span>
+    </div>
+    <div class="ticket-list" *ngIf="myTickets.length > 0; else noTickets">
+      <div
+        class="ticket-row"
+        *ngFor="let t of myTickets"
+        [class.overdue]="isOverdue(t)"
+        (click)="verTicket(t)">
+        <div class="ticket-left">
+          <span class="ticket-id">#{{ t.id | slice:0:8 }}</span>
+          <div class="ticket-info">
+            <span class="ticket-title">{{ t.title }}</span>
+            <span class="ticket-date" *ngIf="t.dueDate" [class.overdue-date]="isOverdue(t)">
+              <i class="pi pi-calendar"></i> Vence {{ t.dueDate | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
+        </div>
+        <span class="badge-status"
+          [style.background]="t.statusColor + '22'"
+          [style.color]="t.statusColor">
+          {{ t.status }}
+        </span>
+      </div>
+    </div>
+    <ng-template #noTickets>
+      <div class="empty-state">
+        <i class="pi pi-inbox"></i>
+        <span>No tienes tickets asignados</span>
+      </div>
+    </ng-template>
+  </div>
+
+</div>
+
+<!-- ── Mis grupos ────────────────────────────────────────── -->
+<div class="dash-section" *ngIf="canViewGroups()">
+  <div class="section-header">
+    <span class="section-title">
+      <span class="section-dot"></span> Mis grupos
+    </span>
+  </div>
+  <div class="groups-row" *ngIf="misGrupos.length > 0">
+    <div class="group-chip" *ngFor="let g of misGrupos" (click)="openGroup(g)">
+      <div class="gchip-left">
+        <span class="gchip-name">{{ g.nombre }}</span>
+        <span class="gchip-desc">{{ g.descripcion }}</span>
+      </div>
+      <div class="gchip-right">
+        <span class="gchip-stat"><i class="pi pi-users"></i> {{ g.integrantes }}</span>
+        <span class="gchip-stat"><i class="pi pi-ticket"></i> {{ g.tickets }}</span>
+        <i class="pi pi-arrow-right gchip-arrow"></i>
+      </div>
+    </div>
+  </div>
+  <div class="empty-state" *ngIf="misGrupos.length === 0">
+    <i class="pi pi-users"></i>
+    <span>No perteneces a ningun grupo</span>
+  </div>
+</div>
+
+<!-- ── Modal Crear Ticket (solo admins) ──────────────────── -->
+<p-dialog
+  *ngIf="canCreateTicket()"
+  header="Crear nuevo ticket"
+  [(visible)]="showTicketModal"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="resetTicketForm()">
+
+  <form [formGroup]="ticketForm" class="ticket-form">
+
+    <div class="field">
+      <label for="grupo">Grupo *</label>
+      <p-select
+        id="grupo"
+        formControlName="grupo_id"
+        [options]="gruposList"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Selecciona un grupo"
+        styleClass="w-full"
+        [appendTo]="'body'"
+        (onChange)="onGrupoChange($event)">
+      </p-select>
+      <small class="p-error"
+        *ngIf="ticketForm.get('grupo_id')?.invalid && ticketForm.get('grupo_id')?.touched">
+        Selecciona un grupo
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="titulo">Título *</label>
+      <input
+        id="titulo"
+        type="text"
+        pInputText
+        formControlName="titulo"
+        placeholder="Título del ticket"
+        class="w-full" />
+      <small class="p-error"
+        *ngIf="ticketForm.get('titulo')?.invalid && ticketForm.get('titulo')?.touched">
+        El título es requerido (mínimo 5 caracteres)
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="descripcion">Descripción *</label>
+      <textarea
+        id="descripcion"
+        pTextarea
+        formControlName="descripcion"
+        rows="4"
+        placeholder="Describe el problema"
+        class="w-full">
+      </textarea>
+      <small class="p-error"
+        *ngIf="ticketForm.get('descripcion')?.invalid && ticketForm.get('descripcion')?.touched">
+        La descripción es requerida (mínimo 10 caracteres)
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="prioridad">Prioridad</label>
+      <p-select
+        id="prioridad"
+        formControlName="prioridad_id"
+        [options]="prioridadesList"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Selecciona una prioridad"
+        styleClass="w-full"
+        [appendTo]="'body'">
+      </p-select>
+    </div>
+
+    <div class="field" *ngIf="asignadosList.length > 0">
+      <label for="asignado">Asignar a</label>
+      <p-select
+        id="asignado"
+        formControlName="asignado_id"
+        [options]="asignadosList"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Selecciona un usuario"
+        styleClass="w-full"
+        [appendTo]="'body'">
+      </p-select>
+    </div>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      severity="secondary"
+      (click)="showTicketModal = false">
+    </p-button>
+    <p-button
+      label="Crear"
+      icon="pi pi-check"
+      [loading]="isLoading"
+      [disabled]="ticketForm.invalid || gruposList.length === 0"
+      (click)="createTicket()">
+    </p-button>
+  </ng-template>
+</p-dialog>

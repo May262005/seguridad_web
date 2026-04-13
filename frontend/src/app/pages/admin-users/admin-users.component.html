@@ -1,0 +1,230 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="users-container">
+  <div class="header">
+    <h2>Administracion de Usuarios</h2>
+    <button
+      *ngIf="hasPermission('user:create')"
+      class="btn-nuevo"
+      (click)="openNewUser()">
+      <i class="pi pi-plus"></i>
+      <span>Nuevo Usuario</span>
+    </button>
+  </div>
+
+  <div class="users-table-wrap">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Nombre completo</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>
+            <div class="user-cell">
+              <div class="avatar" [style.background]="'#C97B8A'">
+                {{ getInitials(user.nombre_completo) }}
+              </div>
+              <span class="username">{{ user.username }}</span>
+            </div>
+           </td>
+          <td>{{ user.nombre_completo }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.telefono || '—' }}</td>
+          <td>
+            <span class="badge-status" [class.active]="user.active" [class.inactive]="!user.active">
+              {{ user.active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>
+            <div class="acciones">
+              <button
+                *ngIf="hasPermission('user:edit')"
+                class="btn-icon"
+                (click)="openEditUser(user)"
+                title="Editar usuario">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button
+                *ngIf="hasPermission('user:edit')"
+                class="btn-icon"
+                (click)="openPasswordModal(user)"
+                title="Cambiar contraseña">
+                <i class="pi pi-lock"></i>
+              </button>
+              <button
+                *ngIf="canManageUserPermissions()"
+                class="btn-icon"
+                (click)="openPermissionModal(user)"
+                title="Gestionar permisos">
+                <i class="pi pi-key"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="users.length === 0">
+          <td colspan="6">
+            <div class="empty-state">
+              <i class="pi pi-users"></i>
+              <span>No hay usuarios registrados</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Crear/Editar Usuario -->
+<p-dialog
+  header="{{ isEditMode ? 'Editar Usuario' : 'Nuevo Usuario' }}"
+  [(visible)]="showUserModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="isEditMode ? userForm : newUserForm" class="user-form">
+    <div class="field">
+      <label>Nombre completo *</label>
+      <input pInputText formControlName="nombre_completo" class="w-full" />
+      <small class="p-error" *ngIf="(isEditMode ? userForm.get('nombre_completo') : newUserForm.get('nombre_completo'))?.invalid && (isEditMode ? userForm.get('nombre_completo') : newUserForm.get('nombre_completo'))?.touched">
+        El nombre es requerido
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Email *</label>
+      <input pInputText formControlName="email" class="w-full" />
+      <small class="p-error" *ngIf="(isEditMode ? userForm.get('email') : newUserForm.get('email'))?.invalid && (isEditMode ? userForm.get('email') : newUserForm.get('email'))?.touched">
+        Email invalido
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Usuario *</label>
+      <input pInputText formControlName="username" class="w-full" />
+      <small class="p-error" *ngIf="(isEditMode ? userForm.get('username') : newUserForm.get('username'))?.invalid && (isEditMode ? userForm.get('username') : newUserForm.get('username'))?.touched">
+        El usuario es requerido
+      </small>
+    </div>
+
+    <!-- Campo de contraseña solo para nuevo usuario -->
+    <div class="field" *ngIf="!isEditMode">
+      <label>Contraseña *</label>
+      <input type="password" pInputText formControlName="password" class="w-full" />
+      <small class="p-error" *ngIf="newUserForm.get('password')?.invalid && newUserForm.get('password')?.touched">
+        Mínimo 6 caracteres
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Dirección</label>
+      <input pInputText formControlName="direccion" class="w-full" />
+    </div>
+
+    <div class="field">
+      <label>Teléfono</label>
+      <input pInputText formControlName="telefono" class="w-full" />
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showUserModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" [loading]="isLoading" (click)="saveUser()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal Cambiar Contraseña -->
+<p-dialog
+  header="Cambiar Contraseña"
+  [(visible)]="showPasswordModal"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="passwordForm" class="user-form">
+    <div class="field">
+      <label>Contraseña actual *</label>
+      <input type="password" pInputText formControlName="currentPassword" class="w-full" />
+      <small class="p-error" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+        La contraseña actual es requerida
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Nueva contraseña *</label>
+      <input type="password" pInputText formControlName="newPassword" class="w-full" />
+      <small class="p-error" *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+        Mínimo 6 caracteres
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Confirmar nueva contraseña *</label>
+      <input type="password" pInputText formControlName="confirmPassword" class="w-full" />
+      <small class="p-error" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched">
+        Las contraseñas no coinciden
+      </small>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showPasswordModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" [loading]="isLoading" (click)="changePassword()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal Gestionar Permisos de Usuario (con Checkboxes) -->
+<p-dialog
+  header="Gestionar Permisos"
+  [(visible)]="showPermissionModal"
+  [modal]="true"
+  [style]="{ width: '550px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <div class="permission-modal" *ngIf="selectedUser">
+    <div class="user-info">
+      <div class="avatar-lg" [style.background]="'#C97B8A'">
+        {{ getInitials(selectedUser.nombre_completo) }}
+      </div>
+      <div class="user-details">
+        <h3>{{ selectedUser.nombre_completo }}</h3>
+        <p>{{ selectedUser.email }}</p>
+        <p class="username">@{{ selectedUser.username }}</p>
+      </div>
+    </div>
+
+    <div class="permission-section">
+      <h4>Permisos Globales del Usuario</h4>
+      <div class="checkbox-grid">
+        <div *ngFor="let permiso of permisosLegibles" class="checkbox-item">
+          <p-checkbox
+            [inputId]="permiso.id"
+            [binary]="true"
+            [ngModel]="isPermissionSelected(permiso.id)"
+            (onChange)="onPermissionChange(permiso.id, $event.checked)">
+          </p-checkbox>
+          <label [for]="permiso.id" class="checkbox-label">
+            <span class="permiso-nombre">{{ permiso.nombreLegible }}</span>
+            <span class="permiso-descripcion" *ngIf="permiso.descripcion">{{ permiso.descripcion }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showPermissionModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" [loading]="isLoading" (click)="savePermissions()"></p-button>
+  </ng-template>
+</p-dialog>

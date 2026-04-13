@@ -1,0 +1,102 @@
+:host {
+  --blush:  #dab0b2;
+  --rose:   #C97B8A;
+  --text:   #4a3a3c;
+  --cream:  #F2EDE4;
+  --white:  #ffffff;
+  --soft:   #9a8082;
+}
+
+:host {
+  display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.home-card {
+  text-align: center;
+  background: var(--white);
+  border: 1.5px solid var(--blush);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(201, 123, 138, 0.12);
+  overflow: hidden;
+  width: 340px;
+}
+
+.home-header {
+  padding: 28px 32px 22px;
+  background: var(--blush);
+}
+
+.home-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'Georgia', serif;
+}
+
+.home-body {
+  padding: 28px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.home-body p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--soft);
+}
+
+.home-botones {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Ambos botones mismo tamaño */
+:host ::ng-deep .btn-login.p-button,
+:host ::ng-deep .btn-login .p-button,
+:host ::ng-deep .btn-registro.p-button,
+:host ::ng-deep .btn-registro .p-button {
+  width: 130px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+  font-size: 14px;
+  justify-content: center;
+}
+
+/* Login - sólido */
+:host ::ng-deep .btn-login.p-button,
+:host ::ng-deep .btn-login .p-button {
+  background: var(--rose) !important;
+  border: none !important;
+}
+
+:host ::ng-deep .btn-login.p-button:hover,
+:host ::ng-deep .btn-login .p-button:hover {
+  filter: brightness(0.92);
+}
+
+/* Registro - outline */
+:host ::ng-deep .btn-registro.p-button,
+:host ::ng-deep .btn-registro .p-button {
+  background: transparent !important;
+  border: 1.5px solid var(--blush) !important;
+}
+
+:host ::ng-deep .btn-registro.p-button .p-button-label,
+:host ::ng-deep .btn-registro .p-button .p-button-label,
+:host ::ng-deep .btn-registro.p-button .p-button-icon,
+:host ::ng-deep .btn-registro .p-button .p-button-icon {
+  color: var(--soft) !important;
+}
+
+:host ::ng-deep .btn-registro.p-button:hover,
+:host ::ng-deep .btn-registro .p-button:hover {
+  background: var(--cream) !important;
+}

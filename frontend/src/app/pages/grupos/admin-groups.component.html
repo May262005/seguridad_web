@@ -1,0 +1,279 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="groups-container">
+  <div class="header-actions">
+    <h2>Gestión de Grupos</h2>
+    <button 
+      class="btn-nuevo"
+      (click)="openNewGroup()"
+      *ngIf="canCreateGroup()">
+      <i class="pi pi-plus"></i>
+      <span>Nuevo Grupo</span>
+    </button>
+  </div>
+
+  <div class="groups-grid">
+    <div class="group-card" *ngFor="let group of groups">
+      <div class="group-header">
+        <div class="group-info">
+          <h3>{{ group.nombre }}</h3>
+          <p class="group-desc">{{ group.descripcion || 'Sin descripción' }}</p>
+        </div>
+        <div class="group-actions" *ngIf="canEditGroup(group) || canDeleteGroup(group)">
+          <button 
+            class="btn-icon"
+            (click)="openEditGroup(group)"
+            *ngIf="canEditGroup(group)"
+            pTooltip="Editar grupo">
+            <i class="pi pi-pencil"></i>
+          </button>
+          <button 
+            class="btn-icon danger"
+            (click)="deleteGroup(group)"
+            *ngIf="canDeleteGroup(group)"
+            pTooltip="Eliminar grupo">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="group-stats">
+        <div class="stat">
+          <i class="pi pi-users"></i>
+          <span>{{ group.miembros?.length || 0 }} miembros</span>
+        </div>
+      </div>
+
+      <div class="group-members">
+        <h4>Miembros</h4>
+        <div class="members-list">
+          <div class="member-item" *ngFor="let member of group.miembros">
+            <div class="member-info">
+              <div class="member-avatar">{{ getInitials(member.nombre_completo || member.username) }}</div>
+              <div class="member-details">
+                <span class="member-name">{{ member.nombre_completo || member.username }}</span>
+                <span class="member-email">{{ member.email }}</span>
+              </div>
+            </div>
+            <div class="member-actions">
+              <button 
+                class="btn-permiso"
+                (click)="openPermissionModal(group, member)"
+                *ngIf="canManageGroupPermissions(group)"
+                pTooltip="Gestionar permisos">
+                <i class="pi pi-key"></i>
+              </button>
+              <button 
+                class="btn-remove"
+                (click)="removeMember(group, member)"
+                *ngIf="canRemoveMembersFromGroup(group)"
+                pTooltip="Remover miembro">
+                <i class="pi pi-user-minus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="add-member" *ngIf="canAddMembersToGroup(group)">
+            <button 
+              class="btn-add"
+              (click)="openMemberModal(group)">
+              <i class="pi pi-user-plus"></i>
+              <span>Agregar miembro</span>
+            </button>
+          </div>
+          <div class="empty-members" *ngIf="!group.miembros?.length">
+            <i class="pi pi-users"></i>
+            <p>No hay miembros en este grupo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-groups" *ngIf="groups.length === 0">
+      <i class="pi pi-folder-open"></i>
+      <p>No hay grupos disponibles</p>
+      <button 
+        class="btn-nuevo"
+        (click)="openNewGroup()"
+        *ngIf="canCreateGroup()">
+        <i class="pi pi-plus"></i>
+        <span>Crear primer grupo</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear/editar grupo -->
+<p-dialog 
+  [(visible)]="showGroupModal" 
+  [header]="isEditMode ? 'Editar Grupo' : 'Nuevo Grupo'"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="groupForm" class="group-form">
+    <div class="field">
+      <label for="nombre">Nombre del grupo *</label>
+      <input 
+        id="nombre" 
+        type="text" 
+        pInputText 
+        formControlName="nombre" 
+        placeholder="Ej: Soporte Técnico"
+        class="w-full">
+      <small class="p-error" *ngIf="groupForm.get('nombre')?.invalid && groupForm.get('nombre')?.touched">
+        El nombre es requerido
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="descripcion">Descripción</label>
+      <textarea 
+        id="descripcion" 
+        pTextarea 
+        rows="3" 
+        formControlName="descripcion" 
+        placeholder="Descripción del grupo"
+        class="w-full"></textarea>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      severity="secondary"
+      (click)="showGroupModal = false">
+    </p-button>
+    <p-button 
+      label="Guardar" 
+      icon="pi pi-check" 
+      [loading]="isLoading" 
+      [disabled]="groupForm.invalid" 
+      (click)="saveGroup()">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal para agregar miembro -->
+<p-dialog 
+  header="Agregar Miembro" 
+  [(visible)]="showMemberModal" 
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="memberForm" class="group-form">
+    <div class="field">
+      <label for="usuario_email">Correo electrónico</label>
+      <input 
+        id="usuario_email" 
+        type="email" 
+        pInputText 
+        formControlName="usuario_email" 
+        placeholder="usuario@ejemplo.com"
+        class="w-full">
+      <small class="p-help">O selecciona de la lista</small>
+    </div>
+
+    <div class="field-divider">o</div>
+
+    <div class="field">
+      <label for="usuario_id">Seleccionar usuario</label>
+      <p-select
+        id="usuario_id"
+        formControlName="usuario_id"
+        [options]="getUsersNotInGroup(selectedGroup)"
+        optionLabel="nombre_completo"
+        optionValue="id"
+        placeholder="Selecciona un usuario"
+        [appendTo]="'body'"
+        class="w-full">
+        <ng-template let-user pTemplate="item">
+          <div class="user-option">
+            <span>{{ user.nombre_completo || user.username }}</span>
+            <small class="user-email">{{ user.email }}</small>
+          </div>
+        </ng-template>
+      </p-select>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      severity="secondary" 
+      (click)="showMemberModal = false">
+    </p-button>
+    <p-button 
+      label="Agregar por correo" 
+      icon="pi pi-envelope" 
+      [loading]="isLoading" 
+      (click)="addMemberByEmail()">
+    </p-button>
+    <p-button 
+      label="Agregar" 
+      icon="pi pi-user-plus" 
+      [loading]="isLoading" 
+      [disabled]="memberForm.invalid" 
+      (click)="addMember()">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal para gestionar permisos -->
+<p-dialog 
+  header="Gestionar Permisos" 
+  [(visible)]="showPermissionModal" 
+  [modal]="true"
+  [style]="{ width: '550px', maxHeight: '80vh' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <div class="permission-modal" *ngIf="selectedUser && selectedGroup">
+    <div class="user-info">
+      <div class="avatar-lg">{{ getInitials(selectedUser.nombre_completo || selectedUser.username) }}</div>
+      <div class="user-details">
+        <h3>{{ selectedUser.nombre_completo || selectedUser.username }}</h3>
+        <p>{{ selectedUser.email }}</p>
+        <p class="group-name">Grupo: {{ selectedGroup.nombre }}</p>
+      </div>
+    </div>
+
+    <div class="permission-section">
+      <h4>Permisos en este grupo</h4>
+      <div class="checkbox-grid">
+        <div class="checkbox-item" *ngFor="let permiso of permisosLegibles">
+          <div class="checkbox-label">
+            <span class="permiso-nombre">{{ permiso.nombreLegible }}</span>
+            <span class="permiso-descripcion">{{ permiso.descripcion }}</span>
+          </div>
+          <p-checkbox 
+            [binary]="true" 
+            [(ngModel)]="selectedPermissionsMap[permiso.id]"
+            (onChange)="onPermissionChange(permiso.id, $event.checked)"
+            [inputId]="permiso.id">
+          </p-checkbox>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cerrar" 
+      icon="pi pi-times" 
+      severity="secondary" 
+      (click)="showPermissionModal = false">
+    </p-button>
+    <p-button 
+      label="Guardar Permisos" 
+      icon="pi pi-save" 
+      [loading]="isLoading" 
+      (click)="savePermissions()">
+    </p-button>
+  </ng-template>
+</p-dialog>

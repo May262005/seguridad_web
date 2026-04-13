@@ -1,0 +1,308 @@
+<p-toast></p-toast>
+
+<div class="detail-container" *ngIf="!isLoading && ticket">
+
+  <!-- ── HEADER ── -->
+  <div class="detail-header">
+    <button class="btn-back" (click)="volver()">
+      <i class="pi pi-arrow-left"></i>
+      Volver
+    </button>
+    <div class="header-badges">
+      <span class="badge-status"
+        [style.background]="(ticket.estado_color || '#9a8082') + '22'"
+        [style.color]="ticket.estado_color || '#9a8082'">
+        {{ ticket.estado_nombre || '—' }}
+      </span>
+      <span class="badge-priority"
+        *ngIf="ticket.prioridad_nombre"
+        [style.color]="getPrioridadColor(ticket.prioridad_nombre)"
+        [style.background]="getPrioridadColor(ticket.prioridad_nombre) + '18'">
+        ● {{ ticket.prioridad_nombre }}
+      </span>
+      <span class="badge-id">#{{ ticket.id | slice:0:8 }}</span>
+      <button
+        *ngIf="canDelete"
+        class="btn-delete"
+        (click)="eliminarTicket()"
+        title="Eliminar ticket">
+        <i class="pi pi-trash"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── TÍTULO ── -->
+  <div class="titulo-section">
+    <div class="titulo-view" *ngIf="!isEditingTitulo">
+      <h1 class="ticket-titulo">{{ ticket.titulo }}</h1>
+      <!-- canEdit ya usa ticket.grupo_id internamente via el getter -->
+      <button class="btn-edit-inline" *ngIf="canEdit" (click)="startEditTitulo()" title="Editar título">
+        <i class="pi pi-pencil"></i>
+      </button>
+    </div>
+    <div class="titulo-edit" *ngIf="isEditingTitulo">
+      <input
+        type="text"
+        [(ngModel)]="editTitulo"
+        class="input-titulo"
+        placeholder="Título del ticket"
+        (keyup.enter)="saveTitulo()"
+        (keyup.escape)="cancelEditTitulo()" />
+      <div class="edit-actions">
+        <button class="btn-save" (click)="saveTitulo()" [disabled]="isSaving">
+          <i class="pi pi-check"></i>
+        </button>
+        <button class="btn-cancel" (click)="cancelEditTitulo()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BODY GRID ── -->
+  <div class="detail-body">
+
+    <!-- ── COLUMNA PRINCIPAL ── -->
+    <div class="main-col">
+
+      <!-- Descripción -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-label"><i class="pi pi-align-left"></i> Descripción</span>
+          <button class="btn-edit-inline" *ngIf="canEdit && !isEditingDescripcion" (click)="startEditDescripcion()">
+            <i class="pi pi-pencil"></i>
+          </button>
+        </div>
+        <div *ngIf="!isEditingDescripcion" class="descripcion-text">
+          {{ ticket.descripcion || 'Sin descripción.' }}
+        </div>
+        <div *ngIf="isEditingDescripcion" class="descripcion-edit">
+          <textarea
+            [(ngModel)]="editDescripcion"
+            rows="5"
+            class="input-descripcion"
+            placeholder="Describe el problema...">
+          </textarea>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveDescripcion()" [disabled]="isSaving">
+              <i class="pi pi-check"></i> Guardar
+            </button>
+            <button class="btn-cancel" (click)="cancelEditDescripcion()">
+              <i class="pi pi-times"></i> Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Comentarios / Historial -->
+      <div class="section-card">
+        <div class="tabs-row">
+          <button class="tab-btn" [class.active]="activeTab === 'comentarios'" (click)="activeTab = 'comentarios'">
+            <i class="pi pi-comments"></i>
+            Comentarios <span class="tab-count">{{ comentarios.length }}</span>
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'historial'" (click)="activeTab = 'historial'">
+            <i class="pi pi-history"></i>
+            Historial <span class="tab-count">{{ historial.length }}</span>
+          </button>
+        </div>
+
+        <!-- Comentarios -->
+        <div *ngIf="activeTab === 'comentarios'" class="tab-content">
+          <div class="comentarios-list">
+            <div *ngFor="let c of comentarios" class="comentario-item">
+              <div class="avatar">{{ getInitials(c.autor_nombre) }}</div>
+              <div class="comentario-body">
+                <div class="comentario-meta">
+                  <span class="comentario-autor">{{ c.autor_nombre }}</span>
+                  <span class="comentario-fecha">{{ formatDate(c.creado_en) }}</span>
+                </div>
+                <p class="comentario-texto">{{ c.contenido }}</p>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="comentarios.length === 0">
+              <i class="pi pi-comments"></i>
+              <span>Sin comentarios aún</span>
+            </div>
+          </div>
+
+          <!-- Nuevo comentario -->
+          <div class="nuevo-comentario">
+            <div class="avatar avatar-me">{{ getInitials('Yo') }}</div>
+            <div class="comentario-input-wrap">
+              <textarea
+                [(ngModel)]="nuevoComentario"
+                rows="3"
+                class="input-comentario"
+                placeholder="Escribe un comentario..."
+                (keydown.ctrl.enter)="enviarComentario()">
+              </textarea>
+              <div class="comentario-actions">
+                <small class="hint">Ctrl + Enter para enviar</small>
+                <button
+                  class="btn-enviar"
+                  (click)="enviarComentario()"
+                  [disabled]="!nuevoComentario.trim() || enviandoComentario">
+                  <i class="pi pi-send"></i>
+                  {{ enviandoComentario ? 'Enviando...' : 'Comentar' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div *ngIf="activeTab === 'historial'" class="tab-content">
+          <div class="historial-list">
+            <div *ngFor="let h of historial" class="historial-item">
+              <div class="historial-dot"></div>
+              <div class="historial-body">
+                <span class="historial-accion">{{ h.accion }}</span>
+                <div class="historial-meta">
+                  <span class="historial-usuario">{{ h.usuario_nombre || 'Sistema' }}</span>
+                  <span class="historial-fecha">{{ formatDate(h.creado_en) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="historial.length === 0">
+              <i class="pi pi-history"></i>
+              <span>Sin actividad registrada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── SIDEBAR ── -->
+    <div class="sidebar-col">
+
+      <!-- Estado -->
+      <div class="sidebar-card">
+        <div class="sidebar-item">
+          <span class="sidebar-label">Estado</span>
+          <div class="sidebar-value-row">
+            <span class="badge-status"
+              [style.background]="(ticket.estado_color || '#9a8082') + '22'"
+              [style.color]="ticket.estado_color || '#9a8082'">
+              {{ ticket.estado_nombre || '—' }}
+            </span>
+            <!-- canMove usa ticket.grupo_id internamente via el getter -->
+            <button class="btn-sidebar-edit" *ngIf="canMove" (click)="openMoveModal()" title="Cambiar estado">
+              <i class="pi pi-pencil"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Prioridad -->
+        <div class="sidebar-item">
+          <span class="sidebar-label">Prioridad</span>
+          <div class="sidebar-value-row">
+            <span *ngIf="ticket.prioridad_nombre"
+              class="badge-priority"
+              [style.color]="getPrioridadColor(ticket.prioridad_nombre)"
+              [style.background]="getPrioridadColor(ticket.prioridad_nombre) + '18'">
+              ● {{ ticket.prioridad_nombre }}
+            </span>
+            <span *ngIf="!ticket.prioridad_nombre" class="sidebar-empty">Sin prioridad</span>
+            <button class="btn-sidebar-edit" *ngIf="canEdit" (click)="openPrioridadModal()" title="Cambiar prioridad">
+              <i class="pi pi-pencil"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Asignado -->
+        <div class="sidebar-item">
+          <span class="sidebar-label">Asignado a</span>
+          <div class="sidebar-value-row">
+            <div class="assignee-chip" *ngIf="ticket.asignado_nombre">
+              <div class="avatar avatar-sm">{{ getInitials(ticket.asignado_nombre) }}</div>
+              <span>{{ ticket.asignado_nombre }}</span>
+            </div>
+            <span *ngIf="!ticket.asignado_nombre" class="sidebar-empty">Sin asignar</span>
+            <button class="btn-sidebar-edit" *ngIf="canEdit" (click)="openAsignarModal()" title="Cambiar asignado">
+              <i class="pi pi-pencil"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Autor -->
+        <div class="sidebar-item">
+          <span class="sidebar-label">Creado por</span>
+          <div class="assignee-chip">
+            <div class="avatar avatar-sm">{{ getInitials(ticket.autor_nombre) }}</div>
+            <span>{{ ticket.autor_nombre || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Grupo -->
+        <div class="sidebar-item">
+          <span class="sidebar-label">Grupo</span>
+          <span class="sidebar-text">{{ ticket.grupo_nombre || (ticket.grupo_id | slice:0:8) }}</span>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <!-- Fechas -->
+        <div class="sidebar-item">
+          <span class="sidebar-label">Creado</span>
+          <span class="sidebar-text">{{ formatDateShort(ticket.creado_en) }}</span>
+        </div>
+
+        <div class="sidebar-item" *ngIf="ticket.fecha_final">
+          <span class="sidebar-label">Completado</span>
+          <span class="sidebar-text">{{ formatDateShort(ticket.fecha_final) }}</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div class="loading-state" *ngIf="isLoading">
+  <i class="pi pi-spin pi-spinner"></i>
+  <span>Cargando ticket...</span>
+</div>
+
+<!-- ── MODAL ESTADO ── -->
+<p-dialog header="Cambiar estado" [(visible)]="showMoveModal" [modal]="true" [style]="{width:'360px'}" [draggable]="false" [resizable]="false">
+  <div class="modal-body">
+    <p-select [options]="estadosOpciones" [(ngModel)]="nuevoEstadoId" optionLabel="label" optionValue="value" placeholder="Selecciona estado" styleClass="w-full" [appendTo]="'body'"></p-select>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showMoveModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" (click)="moveTicket()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- ── MODAL ASIGNADO ── -->
+<p-dialog header="Cambiar asignado" [(visible)]="showAsignarModal" [modal]="true" [style]="{width:'360px'}" [draggable]="false" [resizable]="false">
+  <div class="modal-body">
+    <p-select [options]="miembrosList" [(ngModel)]="nuevoAsignadoId" optionLabel="label" optionValue="value" placeholder="Selecciona usuario" styleClass="w-full" [appendTo]="'body'"></p-select>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showAsignarModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" (click)="saveAsignado()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- ── MODAL PRIORIDAD ── -->
+<p-dialog header="Cambiar prioridad" [(visible)]="showPrioridadModal" [modal]="true" [style]="{width:'360px'}" [draggable]="false" [resizable]="false">
+  <div class="modal-body">
+    <p-select [options]="prioridadesOpciones" [(ngModel)]="nuevaPrioridadId" optionLabel="label" optionValue="value" placeholder="Selecciona prioridad" styleClass="w-full" [appendTo]="'body'"></p-select>
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showPrioridadModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" (click)="savePrioridad()"></p-button>
+  </ng-template>
+</p-dialog>

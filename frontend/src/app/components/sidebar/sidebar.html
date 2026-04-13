@@ -1,0 +1,66 @@
+<div class="sidebar">
+
+  <div class="sidebar-brand">
+    <span class="brand-icon"><i class="pi pi-ticket"></i></span>
+    <span class="brand-name">TicketApp</span>
+  </div>
+
+  <!-- Usuario logueado -->
+  <div class="sidebar-user" *ngIf="currentUser()">
+    <span class="user-av">{{ userAvatar() }}</span>
+    <div class="user-meta">
+      <span class="user-name">{{ userFullName() }}</span>
+      <span class="user-role">{{ currentUser()?.role || 'Usuario' }}</span>
+    </div>
+  </div>
+
+  <div class="sidebar-sep"></div>
+
+  <!-- Navegacion -->
+  <nav class="sidebar-nav">
+
+    <!-- ✅ CORREGIDO: ruta completa /app/dashboard -->
+    <a routerLink="/app/dashboard" routerLinkActive="active" class="nav-item">
+      <i class="pi pi-home"></i>
+      <span>Inicio</span>
+    </a>
+    
+    <!-- ✅ CORREGIDO: ruta completa /app/profile (necesitas crear este componente) -->
+    <a routerLink="/app/profile" routerLinkActive="active" class="nav-item">
+      <i class="pi pi-user-edit"></i>
+      <span>Perfil</span>
+    </a>
+
+    <!-- Separador solo si tiene permisos de administracion -->
+    <div class="sidebar-sep" *ngIf="hasAnyAdminPermission()"></div>
+
+    <!-- Administracion: Grupos y Gestion de Usuarios -->
+    <ng-container *ngIf="hasAnyAdminPermission()">
+      <div class="nav-section-label">Administracion</div>
+
+      <!-- ✅ CORREGIDO: ruta completa /app/groups -->
+      <a routerLink="/app/groups" routerLinkActive="active" class="nav-item" 
+        *ngIf="hasPermission('group:view')">
+        <i class="pi pi-users"></i>
+        <span>Grupos</span>
+      </a>
+
+      <!-- ✅ CORREGIDO: ruta completa /app/users -->
+      <a routerLink="/app/users" routerLinkActive="active" class="nav-item" 
+        *ngIf="hasPermission('user:view') || hasPermission('user:manage-permissions')">
+        <i class="pi pi-cog"></i>
+        <span>Gestion de Usuarios</span>
+      </a>
+    </ng-container>
+
+  </nav>
+
+  <div class="sidebar-bottom">
+    <span class="sidebar-version">v1.0.0</span>
+    <button class="btn-logout" (click)="logout()">
+      <i class="pi pi-sign-out"></i>
+      <span>Cerrar sesion</span>
+    </button>
+  </div>
+
+</div>

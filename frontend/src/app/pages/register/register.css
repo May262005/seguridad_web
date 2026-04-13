@@ -1,0 +1,346 @@
+:host {
+  --blush:  #dab0b2;
+  --rose:   #C97B8A;
+  --text:   #4a3a3c;
+  --cream:  #F2EDE4;
+  --white:  #ffffff;
+  --soft:   #9a8082;
+}
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+/* ── Contenedor ── */
+.register-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 460px;
+  background: var(--white);
+  border: 1.5px solid var(--blush);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(201, 123, 138, 0.12);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.register-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 32px 20px;
+  background: var(--blush);
+}
+
+.register-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: 'Georgia', serif;
+}
+
+/* ── Form ── */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 32px 32px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--soft);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── p-inputgroup (todos los campos con icono) ── */
+:host ::ng-deep .p-inputgroup {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--blush);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  height: 44px;
+  background: var(--white);
+}
+
+:host ::ng-deep .p-inputgroup:focus-within {
+  border-color: var(--rose);
+}
+
+:host ::ng-deep .p-inputgroup-addon {
+  background: var(--white) !important;
+  border: none !important;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+:host ::ng-deep .p-inputgroup-addon i {
+  color: var(--blush);
+  font-size: 14px;
+}
+
+:host ::ng-deep .p-inputgroup input.p-inputtext {
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 14px;
+  color: var(--text);
+  height: 100%;
+  width: 100%;
+  padding: 0 0.75rem;
+  background: var(--white);
+  border-radius: 0 !important;
+}
+
+:host ::ng-deep .p-inputgroup input.p-inputtext:focus        { box-shadow: none !important; outline: none; }
+:host ::ng-deep .p-inputgroup input.p-inputtext::placeholder { color: var(--blush) !important; }
+
+/* ── p-datepicker: mismo alto y estilo que los demás ── */
+:host ::ng-deep .p-datepicker {
+  width: 100%;
+  height: 44px;
+}
+
+:host ::ng-deep .p-datepicker .p-inputtext {
+  height: 44px !important;
+  border: none !important;
+  border-radius: 10px 0 0 10px !important;
+  font-size: 14px;
+  color: var(--text);
+  padding: 0 0.75rem;
+  box-shadow: none !important;
+  background: var(--white);
+}
+
+:host ::ng-deep .p-datepicker .p-inputtext::placeholder { color: var(--blush) !important; }
+:host ::ng-deep .p-datepicker .p-inputtext:focus        { box-shadow: none !important; }
+
+:host ::ng-deep .p-datepicker-input-icon-container,
+:host ::ng-deep .p-datepicker .p-inputicon {
+  border: 1.5px solid var(--blush);
+  border-left: none !important;
+  border-radius: 0 10px 10px 0 !important;
+  background: var(--rose) !important;
+  color: var(--white) !important;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host ::ng-deep .p-datepicker-input-icon-container i,
+:host ::ng-deep .p-datepicker .p-inputicon i {
+  color: var(--white) !important;
+}
+
+/* Contenedor completo del datepicker con borde */
+:host ::ng-deep .p-datepicker {
+  display: flex !important;
+  border: 1.5px solid var(--blush);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+:host ::ng-deep .p-datepicker:focus-within {
+  border-color: var(--rose);
+}
+
+/* ── Password wrapper ── */
+.password-wrapper {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--blush);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  background: var(--white);
+  height: 44px;
+}
+
+.password-wrapper:focus-within { border-color: var(--rose); }
+
+.password-icon {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--white);
+  flex-shrink: 0;
+}
+
+.password-icon i { color: var(--blush); font-size: 14px; }
+
+:host ::ng-deep .password-inner {
+  flex: 1;
+  display: flex !important;
+  align-items: center;
+}
+
+:host ::ng-deep .password-inner input {
+  flex: 1;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  font-size: 14px;
+  color: var(--text);
+  background: transparent;
+  width: 100%;
+  height: 44px;
+  padding: 0 0.75rem;
+}
+
+:host ::ng-deep .password-inner input::placeholder { color: var(--blush) !important; }
+:host ::ng-deep .password-inner input:focus        { box-shadow: none !important; outline: none; }
+
+:host ::ng-deep .password-inner .p-password-toggle-mask-icon,
+:host ::ng-deep .password-inner .pi-eye,
+:host ::ng-deep .password-inner .pi-eye-slash {
+  color: var(--blush) !important;
+  margin-right: 10px;
+}
+
+/* ── Botones ── */
+.botones {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+:host ::ng-deep .btn-registrar.p-button,
+:host ::ng-deep .btn-registrar .p-button,
+:host ::ng-deep .btn-cancelar.p-button,
+:host ::ng-deep .btn-cancelar .p-button {
+  width: 140px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+  font-size: 14px;
+  justify-content: center;
+}
+
+:host ::ng-deep .btn-registrar.p-button,
+:host ::ng-deep .btn-registrar .p-button {
+  background: var(--rose) !important;
+  border: none !important;
+}
+
+:host ::ng-deep .btn-registrar.p-button:hover,
+:host ::ng-deep .btn-registrar .p-button:hover {
+  filter: brightness(0.92);
+}
+
+:host ::ng-deep .btn-cancelar.p-button,
+:host ::ng-deep .btn-cancelar .p-button {
+  background: transparent !important;
+  border: 1.5px solid var(--blush) !important;
+}
+
+:host ::ng-deep .btn-cancelar.p-button .p-button-label,
+:host ::ng-deep .btn-cancelar .p-button .p-button-label,
+:host ::ng-deep .btn-cancelar.p-button .p-button-icon,
+:host ::ng-deep .btn-cancelar .p-button .p-button-icon {
+  color: var(--soft) !important;
+}
+
+:host ::ng-deep .btn-cancelar.p-button:hover,
+:host ::ng-deep .btn-cancelar .p-button:hover {
+  background: var(--cream) !important;
+}
+
+/* ── Error ── */
+.p-error { font-size: 12px; color: var(--rose); }
+
+/* ── Elimina borde interno del p-password dentro del wrapper ── */
+:host ::ng-deep .password-wrapper .p-password {
+  flex: 1;
+  display: flex !important;
+  align-items: center;
+  height: 100%;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:host ::ng-deep .password-wrapper .p-password .p-inputwrapper,
+:host ::ng-deep .password-wrapper .p-password > span {
+  flex: 1;
+  display: flex !important;
+  height: 100%;
+  border: none !important;
+}
+
+/* ── Datepicker: quitar borde propio, usar solo el del wrapper ── */
+:host ::ng-deep .p-datepicker.p-component {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Wrapper del datepicker con el borde correcto */
+.datepicker-wrapper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--blush);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 44px;
+  transition: border-color 0.2s;
+  background: var(--white);
+}
+
+.datepicker-wrapper:focus-within {
+  border-color: var(--rose);
+}
+
+:host ::ng-deep .datepicker-wrapper .p-datepicker {
+  border: none !important;
+  display: flex !important;
+  flex: 1;
+  height: 44px;
+  background: transparent;
+}
+
+:host ::ng-deep .datepicker-wrapper .p-datepicker .p-inputtext {
+  height: 44px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 14px;
+  color: var(--text);
+  padding: 0 0.75rem;
+  box-shadow: none !important;
+  flex: 1;
+}
+
+:host ::ng-deep .datepicker-wrapper .p-datepicker-trigger,
+:host ::ng-deep .datepicker-wrapper .p-datepicker .p-datepicker-trigger {
+  background: var(--rose) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--white) !important;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .datepicker-wrapper .p-datepicker-trigger i,
+:host ::ng-deep .datepicker-wrapper .p-datepicker .p-datepicker-trigger i {
+  color: var(--white) !important;
+}

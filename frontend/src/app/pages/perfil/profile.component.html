@@ -1,0 +1,175 @@
+<p-toast></p-toast>
+
+<div class="profile-container">
+  <div class="profile-card" *ngIf="!isLoading && user">
+    <!-- Header -->
+    <div class="profile-header">
+      <button class="btn-back" (click)="volver()">
+        <i class="pi pi-arrow-left"></i>
+        Volver al Dashboard
+      </button>
+      <div class="avatar-large">
+        {{ getInitials(user.nombre_completo) }}
+      </div>
+      <h2>{{ user.nombre_completo }}</h2>
+      <p class="user-role">{{ user.role || 'Usuario' }}</p>
+    </div>
+
+    <!-- Información del perfil -->
+    <div class="profile-info">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">
+            <i class="pi pi-user"></i> Nombre de usuario
+          </span>
+          <span class="info-value">@{{ user.username }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">
+            <i class="pi pi-envelope"></i> Correo electrónico
+          </span>
+          <span class="info-value">{{ user.email }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">
+            <i class="pi pi-phone"></i> Teléfono
+          </span>
+          <span class="info-value">{{ user.telefono || 'No registrado' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">
+            <i class="pi pi-map-marker"></i> Dirección
+          </span>
+          <span class="info-value">{{ user.direccion || 'No registrada' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">
+            <i class="pi pi-calendar"></i> Miembro desde
+          </span>
+          <span class="info-value">{{ user.fecha_inicio | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">
+            <i class="pi pi-id-card"></i> ID
+          </span>
+          <span class="info-value">#{{ user.id | slice:0:8 }}</span>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="profile-actions">
+        <button class="btn-edit" (click)="openEditModal()">
+          <i class="pi pi-pencil"></i>
+          Editar perfil
+        </button>
+        <button class="btn-password" (click)="openPasswordModal()">
+          <i class="pi pi-lock"></i>
+          Cambiar contraseña
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Cargando perfil...</span>
+  </div>
+</div>
+
+<!-- Modal Editar Perfil -->
+<p-dialog
+  header="Editar Perfil"
+  [(visible)]="showEditModal"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="profileForm" class="profile-form">
+    <div class="field">
+      <label>Nombre completo *</label>
+      <input pInputText formControlName="nombre_completo" class="w-full" />
+      <small class="p-error" *ngIf="profileForm.get('nombre_completo')?.invalid && profileForm.get('nombre_completo')?.touched">
+        El nombre es requerido
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Email *</label>
+      <input pInputText formControlName="email" class="w-full" />
+      <small class="p-error" *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+        Email inválido
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Usuario *</label>
+      <input pInputText formControlName="username" class="w-full" />
+      <small class="p-error" *ngIf="profileForm.get('username')?.invalid && profileForm.get('username')?.touched">
+        El usuario es requerido
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Dirección</label>
+      <input pInputText formControlName="direccion" class="w-full" />
+    </div>
+
+    <div class="field">
+      <label>Teléfono</label>
+      <input pInputText formControlName="telefono" class="w-full" />
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showEditModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" [loading]="isSaving" (click)="saveProfile()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Modal Cambiar Contraseña -->
+<p-dialog
+  header="Cambiar Contraseña"
+  [(visible)]="showPasswordModal"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="passwordForm" class="profile-form">
+    <div class="field">
+      <label>Contraseña actual *</label>
+      <input type="password" pInputText formControlName="currentPassword" class="w-full" />
+      <small class="p-error" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+        La contraseña actual es requerida
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Nueva contraseña *</label>
+      <p-password formControlName="newPassword" [feedback]="true" [toggleMask]="true" styleClass="w-full"></p-password>
+      <small class="p-error" *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+        Mínimo 6 caracteres
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Confirmar nueva contraseña *</label>
+      <input type="password" pInputText formControlName="confirmPassword" class="w-full" />
+      <small class="p-error" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmPassword')?.touched">
+        Las contraseñas no coinciden
+      </small>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showPasswordModal = false"></p-button>
+    <p-button label="Guardar" icon="pi pi-check" [loading]="isSaving" (click)="changePassword()"></p-button>
+  </ng-template>
+</p-dialog>

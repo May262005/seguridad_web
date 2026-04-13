@@ -1,0 +1,302 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="tickets-header">
+  <div class="header-left">
+    <h2 class="page-title">
+      <i class="pi pi-ticket"></i>
+      {{ getNombreGrupoActivo() }}
+    </h2>
+    <span class="ticket-count">{{ allTickets.length }} ticket{{ allTickets.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <div class="header-controls">
+    <p-select
+      *ngIf="gruposList.length > 0"
+      [options]="[{label: 'Todos los grupos', value: ''}, ...gruposList]"
+      [(ngModel)]="grupoIdActivo"
+      optionLabel="label"
+      optionValue="value"
+      placeholder="Todos los grupos"
+      styleClass="grupo-select"
+      (onChange)="onGrupoChange($event.value)">
+    </p-select>
+
+    <div class="view-toggle">
+      <button
+        class="toggle-btn"
+        [class.active]="viewMode === 'kanban'"
+        (click)="viewMode = 'kanban'"
+        title="Vista Kanban">
+        <i class="pi pi-th-large"></i>
+      </button>
+      <button
+        class="toggle-btn"
+        [class.active]="viewMode === 'lista'"
+        (click)="viewMode = 'lista'"
+        title="Vista Lista">
+        <i class="pi pi-list"></i>
+      </button>
+    </div>
+
+    <button
+      *ngIf="canCreateTicket()"
+      class="btn-nuevo-ticket"
+      (click)="openCreateModal()">
+      <i class="pi pi-plus"></i>
+      <span>Nuevo Ticket</span>
+    </button>
+  </div>
+</div>
+
+<div class="kanban-board" *ngIf="viewMode === 'kanban'">
+  <div
+    class="kanban-col"
+    *ngFor="let estado of estados"
+    (dragover)="onDragOver($event)"
+    (drop)="onDrop($event, estado.nombre)">
+
+    <div class="col-header" [style.border-top-color]="estado.color">
+      <div class="col-title-row">
+        <span class="col-dot" [style.background]="estado.color"></span>
+        <span class="col-title">{{ estado.nombre }}</span>
+        <span class="col-count">{{ getTicketsByEstado(estado.nombre).length }}</span>
+      </div>
+    </div>
+
+    <div class="col-cards">
+      <div
+        class="kanban-card"
+        *ngFor="let ticket of getTicketsByEstado(estado.nombre)"
+        [draggable]="canMoveTicket(ticket)"
+        [class.draggable]="canMoveTicket(ticket)"
+        [class.drag-over]="draggedTicket?.id === ticket.id"
+        (dragstart)="onDragStart(ticket)"
+        (dragend)="onDragEnd()"
+        (click)="verTicket(ticket)">
+
+        <div class="card-top">
+          <span class="card-id">#{{ ticket.id | slice:0:8 }}</span>
+          <span
+            class="card-priority"
+            [style.color]="getPrioridadColor(ticket.prioridad_nombre)"
+            [style.background]="getPrioridadColor(ticket.prioridad_nombre) + '18'">
+            ● {{ ticket.prioridad_nombre || 'Sin prioridad' }}
+          </span>
+        </div>
+
+        <p class="card-title">{{ ticket.titulo }}</p>
+
+        <div class="card-footer">
+          <span class="card-assignee">
+            <i class="pi pi-user"></i>
+            {{ ticket.asignado_nombre || 'Sin asignar' }}
+          </span>
+          <button
+            *ngIf="canMoveTicket(ticket)"
+            class="btn-move"
+            (click)="$event.stopPropagation(); openMoveModal(ticket)"
+            title="Mover estado">
+            <i class="pi pi-arrows-h"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-empty" *ngIf="getTicketsByEstado(estado.nombre).length === 0">
+        <i class="pi pi-inbox"></i>
+        <span>Sin tickets</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="lista-container" *ngIf="viewMode === 'lista'">
+  <div class="lista-table-wrap">
+    <table class="lista-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Estado</th>
+          <th>Prioridad</th>
+          <th>Asignado</th>
+          <th>Grupo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let ticket of allTickets"
+          class="lista-row"
+          (click)="verTicket(ticket)">
+          <td>
+            <span class="lista-id">#{{ ticket.id | slice:0:8 }}</span>
+          </td>
+          <td>
+            <span class="lista-title">{{ ticket.titulo }}</span>
+          </td>
+          <td>
+            <span
+              class="badge-status"
+              [style.background]="(ticket.estado_color || '#9a8082') + '22'"
+              [style.color]="ticket.estado_color || '#9a8082'">
+              {{ ticket.estado_nombre || '—' }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="badge-priority"
+              [style.color]="getPrioridadColor(ticket.prioridad_nombre)">
+              ● {{ ticket.prioridad_nombre || '—' }}
+            </span>
+          </td>
+          <td>
+            <span class="lista-assignee">
+              <i class="pi pi-user"></i>
+              {{ ticket.asignado_nombre || 'Sin asignar' }}
+            </span>
+          </td>
+          <td>
+            <span class="lista-grupo">{{ ticket.grupo_nombre || (ticket.grupo_id | slice:0:8) }}</span>
+          </td>
+          <td (click)="$event.stopPropagation()">
+            <div class="lista-actions">
+              <button
+                *ngIf="canMoveTicket(ticket)"
+                class="btn-action"
+                (click)="openMoveModal(ticket)"
+                title="Mover estado">
+                <i class="pi pi-arrows-h"></i>
+              </button>
+              <button
+                class="btn-action"
+                (click)="verTicket(ticket)"
+                title="Ver detalle">
+                <i class="pi pi-eye"></i>
+              </button>
+              <button
+                *ngIf="canDeleteTicket(ticket)"
+                class="btn-action danger"
+                (click)="eliminarTicket(ticket, $event)"
+                title="Eliminar ticket">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="allTickets.length === 0">
+          <td colspan="7">
+            <div class="empty-state">
+              <i class="pi pi-inbox"></i>
+              <span>No hay tickets en este grupo</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p-dialog
+  header="Nuevo Ticket"
+  [(visible)]="showTicketModal"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <form [formGroup]="ticketForm" class="ticket-form">
+    <div class="field">
+      <label>Grupo *</label>
+      <p-select
+        formControlName="grupo_id"
+        [options]="gruposList"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Selecciona un grupo"
+        styleClass="w-full"
+        [appendTo]="'body'"
+        (onChange)="onModalGrupoChange($event.value)">
+      </p-select>
+      <small class="p-error" *ngIf="ticketForm.get('grupo_id')?.invalid && ticketForm.get('grupo_id')?.touched">
+        Selecciona un grupo
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Título *</label>
+      <input pInputText formControlName="titulo" placeholder="Título del ticket" class="w-full" />
+      <small class="p-error" *ngIf="ticketForm.get('titulo')?.invalid && ticketForm.get('titulo')?.touched">
+        Mínimo 5 caracteres
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Descripción *</label>
+      <textarea pTextarea formControlName="descripcion" rows="4" placeholder="Describe el problema" class="w-full"></textarea>
+      <small class="p-error" *ngIf="ticketForm.get('descripcion')?.invalid && ticketForm.get('descripcion')?.touched">
+        Mínimo 10 caracteres
+      </small>
+    </div>
+
+    <div class="field">
+      <p-select
+        formControlName="prioridad_id"
+        [options]="prioridadesOpciones"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Sin prioridad"
+        styleClass="w-full"
+        [appendTo]="'body'">
+      </p-select>
+    </div>
+
+    <div class="field" *ngIf="miembrosList.length > 0">
+      <label>Asignar a</label>
+      <p-select
+        formControlName="asignado_id"
+        [options]="miembrosList"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Selecciona un usuario"
+        styleClass="w-full"
+        [appendTo]="'body'">
+      </p-select>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showTicketModal = false"></p-button>
+    <p-button label="Crear" icon="pi pi-check" [loading]="isLoading" [disabled]="ticketForm.invalid" (click)="createTicket()"></p-button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Mover ticket"
+  [(visible)]="showMoveModal"
+  [modal]="true"
+  [style]="{ width: '380px' }"
+  [draggable]="false"
+  [resizable]="false">
+
+  <div class="move-modal-body" *ngIf="ticketToMove">
+    <p class="move-ticket-title">{{ ticketToMove.titulo }}</p>
+    <div class="field">
+      <label>Nuevo estado</label>
+      <p-select
+        [options]="estadosOpciones"
+        [(ngModel)]="nuevoEstadoId"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Selecciona estado"
+        styleClass="w-full"
+        [appendTo]="'body'">
+      </p-select>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" (click)="showMoveModal = false"></p-button>
+    <p-button label="Mover" icon="pi pi-check" (click)="moveTicket()"></p-button>
+  </ng-template>
+</p-dialog>
